@@ -7,7 +7,8 @@ import {
   UserGroupIcon,
   IdentificationIcon,
 } from "@heroicons/react/24/solid";
-import { Accueil, Historique, Parametrage, Utilisateur, Profil} from "@/pages/page";
+import { Accueil, Historique, Utilisateur, Profil} from "@/pages/intervenant";
+import { Parametrage} from "@/pages/responsable";
 import { SignIn, SignUp } from "@/pages/auth";
 
 const icon = {
@@ -16,7 +17,7 @@ const icon = {
 
 export const routes = [
   {
-    layout: "page",
+    layout: "intervenant",
     pages: [
       {
         icon: <HomeIcon {...icon} />,
@@ -24,13 +25,6 @@ export const routes = [
         path: "/accueil",
         element: <Accueil />,
         op: "",
-      },
-      {
-        icon: <CogIcon {...icon} />,
-        name: "Paramétrage",
-        path: "/parametrage",
-        element: <Parametrage />,
-        op: "none",
       },
       {
         icon: <UserGroupIcon {...icon} />,
@@ -51,6 +45,18 @@ export const routes = [
         name: "Historique",
         path: "/historique",
         element: <Historique />,
+        op: "",
+      },
+    ],
+  },
+  {
+    layout: "responsable",
+    pages: [
+      {
+        icon: <CogIcon {...icon} />,
+        name: "Paramétrage",
+        path: "/parametrage",
+        element: <Parametrage />,
         op: "",
       },
     ],

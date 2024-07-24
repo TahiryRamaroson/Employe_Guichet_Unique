@@ -9,7 +9,7 @@ import {
 } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
 
-export function Sidenav({ brandImg, brandName, routes }) {
+export function SidenavResponsable({ brandImg, brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav } = controller;
   const sidenavTypes = {
@@ -19,7 +19,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
   };
 
   const filteredRoutes = routes
-  .filter(route => route.layout === 'intervenant');
+  .filter(route => route.layout === 'responsable');
 
   return (
     <aside
@@ -100,17 +100,17 @@ export function Sidenav({ brandImg, brandName, routes }) {
   );
 }
 
-Sidenav.defaultProps = {
+SidenavResponsable.defaultProps = {
   brandImg: "/img/logo.svg",
   brandName: "Guichet Unique",
 };
 
-Sidenav.propTypes = {
+SidenavResponsable.propTypes = {
   brandImg: PropTypes.string,
   brandName: PropTypes.string,
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-Sidenav.displayName = "/src/widgets/layout/sidenav.jsx";
+SidenavResponsable.displayName = "/src/widgets/layout/sidenav-responsable.jsx";
 
-export default Sidenav;
+export default SidenavResponsable;

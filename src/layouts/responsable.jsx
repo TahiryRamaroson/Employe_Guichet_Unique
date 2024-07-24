@@ -2,20 +2,20 @@ import { Routes, Route } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton } from "@material-tailwind/react";
 import {
-  Sidenav,
+  SidenavResponsable,
   DashboardNavbar,
   Footer,
 } from "@/widgets/layout";
 import routes from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
 
-export function Dashboard() {
+export function Responsable() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
-      <Sidenav
+      <SidenavResponsable
         routes={routes}
         brandImg={
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
@@ -26,7 +26,7 @@ export function Dashboard() {
         <Routes>
           {routes.map(
             ({ layout, pages }) =>
-              layout === "intervenant" &&
+              layout === "responsable" &&
               pages.map(({ path, element }) => (
                 <Route exact path={path} element={element} />
               ))
@@ -40,6 +40,6 @@ export function Dashboard() {
   );
 }
 
-Dashboard.displayName = "/src/layout/dashboard.jsx";
+Responsable.displayName = "/src/layout/responsable.jsx";
 
-export default Dashboard;
+export default Responsable;
