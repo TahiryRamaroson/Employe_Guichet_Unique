@@ -1,13 +1,14 @@
 import {
   ServerStackIcon,
   RectangleStackIcon,
-  CogIcon,
   HomeIcon,
   ArrowPathRoundedSquareIcon,
-  UserGroupIcon,
   IdentificationIcon,
+  ArrowsRightLeftIcon,
+  FaceSmileIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/solid";
-import { Accueil, Historique, Utilisateur, Profil} from "@/pages/intervenant";
+import { Collecte, Historique, NaissanceIntervenant, Profil, Module, FormNaissance, FormGrossesse, FormPlainte} from "@/pages/intervenant";
 import { Parametrage} from "@/pages/responsable";
 import { SignIn, SignUp } from "@/pages/auth";
 
@@ -20,17 +21,17 @@ export const routes = [
     layout: "intervenant",
     pages: [
       {
-        icon: <HomeIcon {...icon} />,
-        name: "Accueil",
-        path: "/accueil",
-        element: <Accueil />,
+        icon: <Squares2X2Icon {...icon} />,
+        name: "Collecte",
+        path: "/collecte",
+        element: <Collecte />,
         op: "",
       },
       {
-        icon: <UserGroupIcon {...icon} />,
-        name: "Gestion d'utilisateur",
-        path: "/utilisateur",
-        element: <Utilisateur />,
+        icon: <FaceSmileIcon {...icon} />,
+        name: "Naissance",
+        path: "/naissance",
+        element: <NaissanceIntervenant />,
         op: "",
       },
       {
@@ -47,15 +48,64 @@ export const routes = [
         element: <Historique />,
         op: "",
       },
+      {
+        icon: <ArrowPathRoundedSquareIcon {...icon} />,
+        name: "Module",
+        path: "/module",
+        element: <Module />,
+        op: "none",
+      },
+      {
+        icon: <ArrowPathRoundedSquareIcon {...icon} />,
+        name: "Formulaire des naissances",
+        path: "/formulaire-naissance",
+        element: <FormNaissance />,
+        op: "none",
+      },
+      {
+        icon: <ArrowPathRoundedSquareIcon {...icon} />,
+        name: "Formulaire des grossesses",
+        path: "/formulaire-grossesse",
+        element: <FormGrossesse />,
+        op: "none",
+      },
+      {
+        icon: <ArrowPathRoundedSquareIcon {...icon} />,
+        name: "Formulaire des plaintes",
+        path: "/formulaire-plainte",
+        element: <FormPlainte />,
+        op: "none",
+      },
     ],
   },
   {
     layout: "responsable",
     pages: [
       {
-        icon: <CogIcon {...icon} />,
-        name: "Paramétrage",
-        path: "/parametrage",
+        icon: <ArrowsRightLeftIcon {...icon} />,
+        name: "Naissane",
+        path: "/",
+        element: <Parametrage />,
+        op: "",
+      },
+      {
+        icon: <ArrowsRightLeftIcon {...icon} />,
+        name: "Grossesse",
+        path: "/",
+        element: <Parametrage />,
+        op: "",
+      },
+      {
+        icon: <ArrowsRightLeftIcon {...icon} />,
+        name: "Décès",
+        path: "/",
+        element: <Parametrage />,
+        op: "",
+      },
+      {
+        icon: <ArrowsRightLeftIcon {...icon} />,
+        name: "Migration",
+        path: "/",
         element: <Parametrage />,
         op: "",
       },

@@ -66,7 +66,7 @@ export function DashboardNavbar() {
           </Typography>
         </div>
         <div className="flex items-center">
-          <Chip variant="ghost" value="Admin" className="mr-5" icon={<UserCircleIcon/>} />
+          <Chip variant="ghost" value="Admin" color="green" className="mr-5" icon={<UserCircleIcon/>} />
           <IconButton
             variant="text"
             color="blue-gray"
