@@ -38,7 +38,7 @@ export function FormNaissance() {
                   <div className="flex flex-col gap-12">
                     <Input size="lg" label="Prénom(s) du nouveau né" color="green" variant="standard"/>
                     <Input size="lg" label="Lieu de naissance" color="green" variant="standard"/>
-                    <Input size="lg" label="Pièce justificatif" color="green" type="file" variant="standard"/>
+                    <Input size="lg" label="Pièce justificative" color="green" type="file" variant="standard"/>
                   </div>
                   <div className="flex flex-col gap-12">
                     <Select label="Sexe" name="newMarque" size="lg" color="green" variant="standard">

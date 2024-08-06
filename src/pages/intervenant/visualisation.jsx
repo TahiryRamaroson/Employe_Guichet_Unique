@@ -9,13 +9,13 @@ import {
   import { useNavigate, Link } from "react-router-dom";
   import { jwtDecode } from "jwt-decode";
   
-  export function Module() {
+  export function Visualisation() {
   
     return (
       <div>
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 mb-10 place-items-center">
   
-      <Link to="/intervenant/formulaire-naissance"> 
+      <Link to="/intervenant/visualisation-naissance"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -36,7 +36,7 @@ import {
         </Card>
       </Link>
   
-      <Link to="/intervenant/formulaire-grossesse"> 
+      <Link to="/intervenant/visualisation-grossesse"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -57,7 +57,7 @@ import {
         </Card>
       </Link>
 
-      <Link to="/intervenant/formulaire-migration-entrante"> 
+      <Link to="/dashboard/utilisateur"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -78,7 +78,7 @@ import {
         </Card>
       </Link>
 
-      <Link to="/intervenant/formulaire-migration-sortante"> 
+      <Link to="/dashboard/utilisateur"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -99,7 +99,7 @@ import {
         </Card>
       </Link>
 
-      <Link to="/intervenant/formulaire-deces"> 
+      <Link to="/intervenant/visualisation-deces"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -120,7 +120,7 @@ import {
         </Card>
       </Link>
 
-      <Link to="/intervenant/formulaire-plainte"> 
+      <Link to="/intervenant/visualisation-plainte"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -155,5 +155,5 @@ import {
     );
   }
   
-  export default Module;
+  export default Visualisation;
   

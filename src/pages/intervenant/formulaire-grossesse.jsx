@@ -43,7 +43,7 @@ export function FormGrossesse() {
                     <Input size="lg" label="Date prévue d'accouchement (DPA)" color="green" type="date" variant="standard"/>
                   </div>
                   <div className="flex flex-col gap-12">
-                    <Input size="lg" label="Pièce justificatif (Carnet conforme et certifié par le médecin)" color="green" type="file" variant="standard"/>
+                    <Input size="lg" label="Pièce justificative (Carnet conforme et certifié par le médecin)" color="green" type="file" variant="standard"/>
                     <Typography variant="small" color="gray">
                       Antécédents médicaux
                       <select className="block w-full p-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-green-500" multiple>

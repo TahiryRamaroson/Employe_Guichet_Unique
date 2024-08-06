@@ -1,14 +1,13 @@
 import {
   ServerStackIcon,
   RectangleStackIcon,
-  HomeIcon,
   ArrowPathRoundedSquareIcon,
   IdentificationIcon,
   ArrowsRightLeftIcon,
-  FaceSmileIcon,
   Squares2X2Icon,
+  TableCellsIcon,
 } from "@heroicons/react/24/solid";
-import { Collecte, Historique, NaissanceIntervenant, Profil, Module, FormNaissance, FormGrossesse, FormPlainte} from "@/pages/intervenant";
+import { Collecte, Historique, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, Profil, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante} from "@/pages/intervenant";
 import { Parametrage} from "@/pages/responsable";
 import { SignIn, SignUp } from "@/pages/auth";
 
@@ -28,11 +27,39 @@ export const routes = [
         op: "",
       },
       {
-        icon: <FaceSmileIcon {...icon} />,
-        name: "Naissance",
-        path: "/naissance",
-        element: <NaissanceIntervenant />,
+        icon: <TableCellsIcon {...icon} />,
+        name: "Visualisation",
+        path: "/visualisation",
+        element: <Visualisation />,
         op: "",
+      },
+      {
+        icon: <TableCellsIcon {...icon} />,
+        name: "Visualisation des naissances",
+        path: "/visualisation-naissance",
+        element: <VisualisationNaissance />,
+        op: "none",
+      },
+      {
+        icon: <TableCellsIcon {...icon} />,
+        name: "Visualisation des grossesses",
+        path: "/visualisation-grossesse",
+        element: <VisualisationGrossesse />,
+        op: "none",
+      },
+      {
+        icon: <TableCellsIcon {...icon} />,
+        name: "Visualisation des décès",
+        path: "/visualisation-deces",
+        element: <VisualisationDeces />,
+        op: "none",
+      },
+      {
+        icon: <TableCellsIcon {...icon} />,
+        name: "Visualisation des plaintes",
+        path: "/visualisation-plainte",
+        element: <VisualisationPlainte />,
+        op: "none",
       },
       {
         icon: <IdentificationIcon {...icon} />,
@@ -74,6 +101,27 @@ export const routes = [
         name: "Formulaire des plaintes",
         path: "/formulaire-plainte",
         element: <FormPlainte />,
+        op: "none",
+      },
+      {
+        icon: <ArrowPathRoundedSquareIcon {...icon} />,
+        name: "Formulaire des décès",
+        path: "/formulaire-deces",
+        element: <FormDeces />,
+        op: "none",
+      },
+      {
+        icon: <ArrowPathRoundedSquareIcon {...icon} />,
+        name: "Formulaire des migrations entrantes",
+        path: "/formulaire-migration-entrante",
+        element: <FormMigrationEntrante />,
+        op: "none",
+      },
+      {
+        icon: <ArrowPathRoundedSquareIcon {...icon} />,
+        name: "Formulaire des migrations Sortantes",
+        path: "/formulaire-migration-sortante",
+        element: <FormMigrationSortante />,
         op: "none",
       },
     ],

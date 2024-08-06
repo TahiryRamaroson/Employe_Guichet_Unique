@@ -1,4 +1,9 @@
 import React from "react";
+import data_naissance from "../../data/naissance";
+//import XLSX from 'xlsx';
+//import jsPDF from 'jspdf';
+//import 'jspdf-autotable';
+//import html2canvas from 'html2canvas';
 
 import {
     Card,
@@ -21,15 +26,43 @@ import {
     IconButton
   } from "@material-tailwind/react";
 
+import DateFormatter from "@/widgets/layout/date-formatter";
+
 import {PlusIcon, ArrowUpTrayIcon, DocumentIcon} from "@heroicons/react/24/solid";
 
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
   
-  export function NaissanceIntervenant() {
+  export function VisualisationNaissance() {
 
-    const [type, setType] = React.useState("card");
+    // const handleExportExcel = (data) => {
+    //   //const ws = XLSX.utils.json_to_sheet(data); // Convertir vos données en feuille de calcul
+    //   //const wb = XLSX.utils.book_new(); // Créer un nouveau classeur (workbook)
+    //   //XLSX.utils.book_append_sheet(wb, ws, 'Feuille1'); // Ajouter la feuille de calcul au classeur
+  
+    //   // Générer le fichier Excel
+    //   //XLSX.writeFile(wb, 'export.xlsx');
+    // };
+
+    // const generatePDF = () => {
+    //   const doc = new jsPDF();
+    //   doc.autoTable({ html: 'table' });
+    //   doc.save('liste_naissance.pdf');
+    // };
+
+    // const captureElement = async () => {
+    //   const element = document.getElementById('myData'); // Remplacez par l'ID de votre élément
+    //   const canvas = await html2canvas(element);
+    //   return canvas.toDataURL('image/png');
+    // };
+
+    // const createPDF = async () => {
+    //   const imgData = await captureElement();
+    //   const doc = new jsPDF();
+    //   doc.addImage(imgData, 'PNG', 10, 10, 190, 0); // Ajustez les coordonnées et la taille
+    //   doc.save('myPDF.pdf');
+    // };
 
     return (
       <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -39,13 +72,13 @@ import { jwtDecode } from "jwt-decode";
             color="black"
             className="mt-4 flex justify-center gap-1 text-4xl font-normal"
           >
-            Liste des naissances
+            Visualisation des naissances
           </Typography>
 
           <Card color="transparent" shadow={false} className="p-6 text-center mb-8">
             <SpeedDial placement="bottom">
               <SpeedDialHandler>
-                <IconButton size="lg" className="rounded-full" color="light-gray">
+                <IconButton size="lg" className="rounded-full" color="gray">
                   <ArrowUpTrayIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
                 </IconButton>
               </SpeedDialHandler>
@@ -103,7 +136,7 @@ import { jwtDecode } from "jwt-decode";
         
       
       <CardBody className="overflow-scroll px-0">
-        <table className="w-full min-w-max table-auto">
+        <table className="w-full min-w-max table-auto" id="mydata">
           <thead>
             <tr>
               
@@ -111,7 +144,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -122,7 +155,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -133,7 +166,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -144,7 +177,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -155,7 +188,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -166,7 +199,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -177,7 +210,18 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
+                    color="blue-gray"
+                    className="font-normal leading-none opacity-70"
+                  >
+                    Pièce justificative
+                  </Typography>
+                </th>
+                <th
+                  className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                >
+                  <Typography
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -188,7 +232,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -199,7 +243,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -210,7 +254,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -221,7 +265,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -232,7 +276,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -243,7 +287,7 @@ import { jwtDecode } from "jwt-decode";
                   className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                 >
                   <Typography
-                    variant="medium"
+                    variant="paragraph"
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
@@ -254,14 +298,15 @@ import { jwtDecode } from "jwt-decode";
             </tr>
           </thead>
           <tbody>
-                  <tr>
+          {data_naissance && data_naissance.map((item) => (
+                  <tr key={item.id}>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
                           <Typography
                             variant="small"
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Rabe
+                            {item.Menage ? item.Menage.Numero_menage : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -270,7 +315,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Koto
+                            {item.Nom_nouveau_ne}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -279,7 +324,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Intervenant
+                            <DateFormatter date={item.Date_naissance} />
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -288,7 +333,7 @@ import { jwtDecode } from "jwt-decode";
                           color="blue-gray"
                           className="font-normal"
                         >
-                          
+                          {item.Lieu_naissance}
                         </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -297,7 +342,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Intervenant
+                            {item.Numero_naissance}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -306,7 +351,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Intervenant
+                            {item.Sexe ? item.Sexe.nom : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -315,7 +360,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Intervenant
+                            {item.Piece_justificative}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -324,7 +369,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Intervenant
+                            {item.Pere ? item.Pere.nom : ''} {item.Pere ? item.Pere.prenom : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -333,7 +378,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Intervenant
+                            {item.Mere ? item.Mere.nom : ''} {item.Mere ? item.Mere.prenom : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -342,7 +387,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Intervenant
+                            {item.Pere ? item.Pere.CIN : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -351,7 +396,7 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            Koto
+                            {item.Mere ? item.Mere.CIN : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -360,7 +405,16 @@ import { jwtDecode } from "jwt-decode";
                             color="blue-gray"
                             className="font-normal"
                           >
-                            -
+                            {item.intervenant ? item.intervenant.nom : ''}
+                          </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {item.responsable ? item.responsable.nom : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -372,13 +426,14 @@ import { jwtDecode } from "jwt-decode";
                             <Chip
                             variant="ghost"
                             color="green"
-                            size="xs"
-                            value="validé"
+                            size="sm"
+                            value={item.statut}
                           />
                           </Typography>
                     </td>
 
                   </tr>
+                  ))}
           </tbody>
         </table>
       </CardBody>
@@ -401,5 +456,5 @@ import { jwtDecode } from "jwt-decode";
     );
   }
   
-  export default NaissanceIntervenant;
+  export default VisualisationNaissance;
   
