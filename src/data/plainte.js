@@ -52,7 +52,8 @@ var data_plainte = [{
       nom: "Jean",
       prenom: "Ba"
     },
-    statut: "validé"
+    statut: "validé",
+    statut_traitement: "En cours"
   },]
 
   export default data_plainte;

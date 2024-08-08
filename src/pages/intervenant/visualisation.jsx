@@ -57,7 +57,7 @@ import {
         </Card>
       </Link>
 
-      <Link to="/dashboard/utilisateur"> 
+      <Link to="/intervenant/visualisation-migration-entrante"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -78,7 +78,7 @@ import {
         </Card>
       </Link>
 
-      <Link to="/dashboard/utilisateur"> 
+      <Link to="/intervenant/visualisation-migration-sortante"> 
         <Card color="green" variant="gradient" className="w-80 max-w-[20rem] p-5 mt-6 rounded-none">
           <CardBody
             floated={false}
@@ -143,14 +143,6 @@ import {
   
       </div>
 
-      <div className="flex justify-start mt-9 mb-5">
-      <Link to="/intervenant/collecte">
-        <Button className="flex items-center text-center border-2 me-2 mb-2" color="green" variant="outlined">
-          <ChevronLeftIcon className="h-4 w-4" />
-          <span className="ml-2">Précédent</span>
-        </Button>
-      </Link>
-      </div>
       </div>
     );
   }

@@ -2,14 +2,13 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
   ArrowPathRoundedSquareIcon,
-  IdentificationIcon,
-  ArrowsRightLeftIcon,
   Squares2X2Icon,
   TableCellsIcon,
 } from "@heroicons/react/24/solid";
-import { Collecte, Historique, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, Profil, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante} from "@/pages/intervenant";
-import { Parametrage} from "@/pages/responsable";
+import { Collecte, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, VisualisationMigrationEntrante, VisualisationMigrationSortante, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante} from "@/pages/intervenant";
+import { Planning, ValidationNaissance, ValidationGrossesse, ValidationDeces, ValidationPlainte, ValidationMigrationEntrante, ValidationMigrationSortante} from "@/pages/responsable";
 import { SignIn, SignUp } from "@/pages/auth";
+import { ExclamationTriangleIcon, FaceSmileIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, ChatBubbleOvalLeftEllipsisIcon, CalendarDaysIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -62,18 +61,18 @@ export const routes = [
         op: "none",
       },
       {
-        icon: <IdentificationIcon {...icon} />,
-        name: "Gestion de profil",
-        path: "/profil",
-        element: <Profil />,
-        op: "",
+        icon: <TableCellsIcon {...icon} />,
+        name: "Visualisation des migrations entrante",
+        path: "/visualisation-migration-entrante",
+        element: <VisualisationMigrationEntrante />,
+        op: "none",
       },
       {
-        icon: <ArrowPathRoundedSquareIcon {...icon} />,
-        name: "Historique",
-        path: "/historique",
-        element: <Historique />,
-        op: "",
+        icon: <TableCellsIcon {...icon} />,
+        name: "Visualisation des migrations sortante",
+        path: "/visualisation-migration-sortante",
+        element: <VisualisationMigrationSortante />,
+        op: "none",
       },
       {
         icon: <ArrowPathRoundedSquareIcon {...icon} />,
@@ -130,31 +129,52 @@ export const routes = [
     layout: "responsable",
     pages: [
       {
-        icon: <ArrowsRightLeftIcon {...icon} />,
+        icon: <CalendarIcon {...icon} />,
+        name: "Planning GU",
+        path: "/planning",
+        element: <Planning />,
+        op: "",
+      },
+      {
+        icon: <FaceSmileIcon {...icon} />,
         name: "Naissane",
-        path: "/",
-        element: <Parametrage />,
+        path: "/validation-naissance",
+        element: <ValidationNaissance />,
         op: "",
       },
       {
-        icon: <ArrowsRightLeftIcon {...icon} />,
+        icon: <CalendarDaysIcon {...icon} />,
         name: "Grossesse",
-        path: "/",
-        element: <Parametrage />,
+        path: "/validation-grossesse",
+        element: <ValidationGrossesse />,
         op: "",
       },
       {
-        icon: <ArrowsRightLeftIcon {...icon} />,
+        icon: <ExclamationTriangleIcon {...icon} />,
         name: "Décès",
-        path: "/",
-        element: <Parametrage />,
+        path: "/validation-deces",
+        element: <ValidationDeces />,
         op: "",
       },
       {
-        icon: <ArrowsRightLeftIcon {...icon} />,
-        name: "Migration",
-        path: "/",
-        element: <Parametrage />,
+        icon: <ArrowDownOnSquareIcon {...icon} />,
+        name: "Migration Entrante",
+        path: "/validation-migration-entrante",
+        element: <ValidationMigrationEntrante />,
+        op: "",
+      },
+      {
+        icon: <ArrowUpOnSquareIcon {...icon} />,
+        name: "Migration Sortante",
+        path: "/validation-migration-sortante",
+        element: <ValidationMigrationSortante />,
+        op: "",
+      },
+      {
+        icon: <ChatBubbleOvalLeftEllipsisIcon {...icon} />,
+        name: "Plainte",
+        path: "/validation-plainte",
+        element: <ValidationPlainte />,
         op: "",
       },
     ],

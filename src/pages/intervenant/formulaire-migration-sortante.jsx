@@ -31,14 +31,16 @@ export function FormMigrationSortante() {
                 </Typography>
               </div>
               <CardBody>
-              <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="flex flex-col gap-12">
                     <Select label="Individu" name="newMarque" size="lg" color="green" variant="standard">
                         <Option value="">Koto</Option>
                         <Option value="">Bema</Option>
                     </Select>
-                    <div style={{marginTop:-15}}></div>
-                    <Textarea size="lg" label="Motif de la migration" color="green"/>
+                    <Select label="Motif de la migration" name="newMar" size="lg" color="green" variant="standard">
+                        <Option value="">Etude</Option>
+                        <Option value="">Urgence familiale</Option>
+                    </Select>
                     <div className="flex gap-10">
                       <Typography
                         color="blue-gray"
@@ -47,7 +49,7 @@ export function FormMigrationSortante() {
                         Statut de départ
                       </Typography>
                       <Radio
-                        name="type"
+                        name="statut"
                         color="green"
                         ripple={true}
                         className="border-gray-900/10 bg-gray-900/5 p-0 transition-all hover:before:opacity-0"
@@ -61,7 +63,7 @@ export function FormMigrationSortante() {
                         }
                       />
                       <Radio
-                        name="type"
+                        name="statut"
                         color="green"
                         ripple={true}
                         className="border-gray-900/10 bg-gray-900/5 p-0 transition-all hover:before:opacity-0"
@@ -75,6 +77,43 @@ export function FormMigrationSortante() {
                         }
                       />
                     </div>
+                    <div className="flex gap-10">
+                      <Typography
+                        color="blue-gray"
+                        className="font-normal text-blue-gray-400 mt-2"
+                      >
+                        Nouveau ménage?
+                      </Typography>
+                      <Radio
+                        name="menage"
+                        color="green"
+                        ripple={true}
+                        className="border-gray-900/10 bg-gray-900/5 p-0 transition-all hover:before:opacity-0"
+                        label={
+                          <Typography
+                            color="blue-gray"
+                            className="font-normal text-blue-gray-400"
+                          >
+                            Oui
+                          </Typography>
+                        }
+                      />
+                      <Radio
+                        name="menage"
+                        color="green"
+                        ripple={true}
+                        className="border-gray-900/10 bg-gray-900/5 p-0 transition-all hover:before:opacity-0"
+                        label={
+                          <Typography
+                            color="blue-gray"
+                            className="font-normal text-blue-gray-400"
+                          >
+                            Non
+                          </Typography>
+                        }
+                      />
+                    </div>
+                    <Input size="lg" label="Adresse" color="green" variant="standard"/>
                   </div>
                   <div className="flex flex-col gap-12">
                     <Input size="lg" label="Date de départ" color="green" variant="standard" type="date"/>
@@ -86,7 +125,7 @@ export function FormMigrationSortante() {
                         Destination
                       </Typography>
                       <Radio
-                        name="type"
+                        name="destination"
                         color="green"
                         ripple={true}
                         className="border-gray-900/10 bg-gray-900/5 p-0 transition-all hover:before:opacity-0"
@@ -100,7 +139,7 @@ export function FormMigrationSortante() {
                         }
                       />
                       <Radio
-                        name="type"
+                        name="destination"
                         color="green"
                         ripple={true}
                         className="border-gray-900/10 bg-gray-900/5 p-0 transition-all hover:before:opacity-0"
@@ -114,24 +153,25 @@ export function FormMigrationSortante() {
                         }
                       />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="flex flex-col gap-12">
-                        <Select label="Region de destination" name="newMarque" size="lg" color="green" variant="standard">
-                            <Option value="">Analamanga</Option>
-                        </Select>
-                        <Select label="Commune de destination" name="newMarque" size="lg" color="green" variant="standard">
-                            <Option value="">Analamanga</Option>
-                        </Select>
-                      </div>
-                      <div className="flex flex-col gap-12">
-                        <Select label="District de destination" name="newMarque" size="lg" color="green" variant="standard">
-                            <Option value="">Analamanga</Option>
-                        </Select>
-                        <Select label="Fokotany de destination" name="newMarque" size="lg" color="green" variant="standard">
-                            <Option value="">Analamanga</Option>
-                        </Select>
-                      </div>
+                    
+                    <div className="flex gap-8">
+                      <Select label="Region de destination" name="newMarque" size="lg" color="green" variant="standard">
+                          <Option value="">Analamanga</Option>
+                      </Select>
+                      <Select label="Commune de destination" name="newMarque" size="lg" color="green" variant="standard">
+                          <Option value="">Analamanga</Option>
+                      </Select>
                     </div>
+                    <div className="flex gap-8">
+                      <Select label="District de destination" name="newMarque" size="lg" color="green" variant="standard">
+                          <Option value="">Analamanga</Option>
+                      </Select>
+                      <Select label="Fokotany de destination" name="newMarque" size="lg" color="green" variant="standard">
+                          <Option value="">Analamanga</Option>
+                          <Option value="">Vakinakaratra</Option>
+                      </Select>
+                    </div>
+                    
                     <div className="flex gap-8">
                         <Input size="lg" label="Durée de l'absence" color="green" variant="standard"/>
                         <Select label="unité" name="newMarque" size="lg" color="green" variant="standard">

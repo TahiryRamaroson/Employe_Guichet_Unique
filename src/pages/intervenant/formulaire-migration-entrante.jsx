@@ -31,14 +31,16 @@ export function FormMigrationEntrante() {
                 </Typography>
               </div>
               <CardBody>
-              <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="flex flex-col gap-12">
                     <Select label="Individu" name="newMarque" size="lg" color="green" variant="standard">
                         <Option value="">Koto</Option>
                         <Option value="">Bema</Option>
                     </Select>
-                    <div style={{marginTop:-15}}></div>
-                    <Textarea size="lg" label="Motif de la migration" color="green"/>
+                    <Select label="Motif de la migration" name="newMar" size="lg" color="green" variant="standard">
+                        <Option value="">Etude</Option>
+                        <Option value="">Urgence familiale</Option>
+                    </Select>
                     <div className="flex gap-10">
                       <Typography
                         color="blue-gray"
@@ -80,15 +82,15 @@ export function FormMigrationEntrante() {
                     <Input size="lg" label="Date d'arrivée" color="green" variant="standard" type="date"/>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="flex flex-col gap-12">
-                        <Select label="Region d'origine" name="newMarque" size="lg" color="green" variant="standard">
+                        <Select label="Region origine" name="newMar" size="lg" color="green" variant="standard">
                             <Option value="">Analamanga</Option>
                         </Select>
-                        <Select label="Commune d'origine" name="newMarque" size="lg" color="green" variant="standard">
+                        <Select label="Commune d'origine" name="newMarq" size="lg" color="green" variant="standard">
                             <Option value="">Analamanga</Option>
                         </Select>
                       </div>
                       <div className="flex flex-col gap-12">
-                        <Select label="District d'origine" name="newMarque" size="lg" color="green" variant="standard">
+                        <Select label="District d'origine" name="newMarqu" size="lg" color="green" variant="standard">
                             <Option value="">Analamanga</Option>
                         </Select>
                         <Select label="Fokotany d'origine" name="newMarque" size="lg" color="green" variant="standard">
