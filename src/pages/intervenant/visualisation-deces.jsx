@@ -1,9 +1,8 @@
 import React from "react";
 import data_deces from "../../data/deces";
-//import XLSX from 'xlsx';
-//import jsPDF from 'jspdf';
-//import 'jspdf-autotable';
-//import html2canvas from 'html2canvas';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
+
 
 import {
     Card,
@@ -32,6 +31,15 @@ import { jwtDecode } from "jwt-decode";
   
   export function VisualisationDeces() {
 
+    const exportToExcel = (data, fileName) => {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'});
+      FileSaver.saveAs(data, fileName + '.xlsx'); 
+  
+  };
+
     return (
       <div className="mt-12 mb-8 flex flex-col gap-12">
     <Card className="h-full w-full">
@@ -51,7 +59,7 @@ import { jwtDecode } from "jwt-decode";
                 </IconButton>
               </SpeedDialHandler>
               <SpeedDialContent className="flex-row">
-                <SpeedDialAction className="h-16 w-16">
+                <SpeedDialAction className="h-16 w-16" onClick={() => exportToExcel(data_deces, 'Data_deces')}>
                   <DocumentIcon className="h-5 w-5" />
                   <Typography color="blue-gray" className="text-xs font-normal">
                     Excel
@@ -61,12 +69,6 @@ import { jwtDecode } from "jwt-decode";
                   <DocumentIcon className="h-5 w-5" />
                   <Typography color="blue-gray" className="text-xs font-normal">
                     CSV
-                  </Typography>
-                </SpeedDialAction>
-                <SpeedDialAction className="h-16 w-16">
-                  <DocumentIcon className="h-5 w-5" />
-                  <Typography color="blue-gray" className="text-xs font-normal">
-                    PDF
                   </Typography>
                 </SpeedDialAction>
               </SpeedDialContent>

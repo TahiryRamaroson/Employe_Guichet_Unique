@@ -8,12 +8,11 @@ const DateFormatter = ({ date }) => {
 };
 
 DateFormatter.defaultProps = {
-    date: 0
+    date: ''
 };
   
 DateFormatter.propTypes = {
     date: PropTypes.any,
-    routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default DateFormatter;

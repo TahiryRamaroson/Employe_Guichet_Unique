@@ -47,6 +47,7 @@ var data_deces = [{
       prenom: "Ba"
     },
     statut: "validé"
-  },]
+  },
+]
 
   export default data_deces;
