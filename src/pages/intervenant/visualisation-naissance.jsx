@@ -1,21 +1,13 @@
 import React from "react";
 import data_naissance from "../../data/naissance";
-//import XLSX from 'xlsx';
-//import jsPDF from 'jspdf';
-//import 'jspdf-autotable';
-//import html2canvas from 'html2canvas';
 
 import {
     Card,
-    Popover,
-    PopoverHandler,
-    PopoverContent,
     CardBody,
     CardFooter,
     Typography,
     Button,
     Input,
-    Tooltip,
     Select, 
     Option,
     Chip,
@@ -36,33 +28,32 @@ import { jwtDecode } from "jwt-decode";
   
   export function VisualisationNaissance() {
 
-    // const handleExportExcel = (data) => {
-    //   //const ws = XLSX.utils.json_to_sheet(data); // Convertir vos données en feuille de calcul
-    //   //const wb = XLSX.utils.book_new(); // Créer un nouveau classeur (workbook)
-    //   //XLSX.utils.book_append_sheet(wb, ws, 'Feuille1'); // Ajouter la feuille de calcul au classeur
-  
-    //   // Générer le fichier Excel
-    //   //XLSX.writeFile(wb, 'export.xlsx');
-    // };
+    const navigate = useNavigate();
 
-    // const generatePDF = () => {
-    //   const doc = new jsPDF();
-    //   doc.autoTable({ html: 'table' });
-    //   doc.save('liste_naissance.pdf');
-    // };
+  useEffect(() => {
+    const checkToken = () => {
+      const token = sessionStorage.getItem('authToken');
 
-    // const captureElement = async () => {
-    //   const element = document.getElementById('myData'); // Remplacez par l'ID de votre élément
-    //   const canvas = await html2canvas(element);
-    //   return canvas.toDataURL('image/png');
-    // };
+      if (!token) {
+        navigate('/auth/sign-in');
+      }
 
-    // const createPDF = async () => {
-    //   const imgData = await captureElement();
-    //   const doc = new jsPDF();
-    //   doc.addImage(imgData, 'PNG', 10, 10, 190, 0); // Ajustez les coordonnées et la taille
-    //   doc.save('myPDF.pdf');
-    // };
+      try {
+        const decodedtoken = jwtDecode(token);
+        const now = Date.now() / 1000;
+        if(now > decodedtoken.exp || decodedtoken.profil != "Intervenant sociaux") {
+          sessionStorage.removeItem('authToken');
+          navigate('/auth/sign-in');
+        }
+      } catch (error) {
+        sessionStorage.removeItem('authToken');
+        navigate('/auth/sign-in');
+      }
+
+    };
+
+    checkToken();
+    }, [navigate]);
 
     return (
       <div className="mt-12 mb-8 flex flex-col gap-12">

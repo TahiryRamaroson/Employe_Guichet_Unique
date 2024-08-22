@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import data_deces from "../../data/deces";
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { CSVLink } from 'react-csv';
 
 
 import {
@@ -31,14 +32,74 @@ import { jwtDecode } from "jwt-decode";
   
   export function VisualisationDeces() {
 
+    const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkToken = () => {
+      const token = sessionStorage.getItem('authToken');
+
+      if (!token) {
+        navigate('/auth/sign-in');
+      }
+
+      try {
+        const decodedtoken = jwtDecode(token);
+        const now = Date.now() / 1000;
+        if(now > decodedtoken.exp || decodedtoken.profil != "Intervenant sociaux") {
+          sessionStorage.removeItem('authToken');
+          navigate('/auth/sign-in');
+        }
+      } catch (error) {
+        sessionStorage.removeItem('authToken');
+        navigate('/auth/sign-in');
+      }
+
+    };
+
+    checkToken();
+    }, [navigate]);
+
+    const flattenObject = (obj) => {
+      const result = {};
+      function flatten(obj, prefix = '') {
+        for (const key in obj) {
+          if (typeof obj[key] === 'object' && obj[key] !== null) {
+            flatten(obj[key], prefix + key + '.');
+          } else {
+            result[prefix + key] = obj[key];
+          }
+        }
+      }
+      flatten(obj);
+      return result;
+    };
+    
     const exportToExcel = (data, fileName) => {
-      const worksheet = XLSX.utils.json_to_sheet(data);
+      const flattenedData = data.map(item => flattenObject(item));
+    
+      const worksheet = XLSX.utils.json_to_sheet(flattenedData);
       const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'});
+      data = new Blob([excelBuffer], 
+     { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'});
       FileSaver.saveAs(data, fileName + '.xlsx'); 
-  
-  };
+    
+    };
+
+    const exportToCsv = (data, fileName) => {
+      const csvContent = "data:text/csv;charset=utf-8," +
+      data.map(row => {
+        // Assuming you want specific properties like id and nom from Defunt
+        return `${row.Defunt.id},${row.Defunt.nom}`; 
+      }).join("\n");
+    
+      const link = document.createElement("a");
+      link.href = encodeURI(csvContent);
+      link.setAttribute("download", `${fileName}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
 
     return (
       <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -50,6 +111,9 @@ import { jwtDecode } from "jwt-decode";
           >
             Visualisation des décès
           </Typography>
+          <CSVLink data={data_deces} filename="my-data.csv">
+            Télécharger le CSV
+          </CSVLink>
 
           <Card color="transparent" shadow={false} className="p-6 text-center mb-8">
             <SpeedDial placement="bottom">
@@ -65,7 +129,7 @@ import { jwtDecode } from "jwt-decode";
                     Excel
                   </Typography>
                 </SpeedDialAction>
-                <SpeedDialAction className="h-16 w-16">
+                <SpeedDialAction className="h-16 w-16" onClick={() => exportToCsv(data_deces, 'Data_deces')}>
                   <DocumentIcon className="h-5 w-5" />
                   <Typography color="blue-gray" className="text-xs font-normal">
                     CSV

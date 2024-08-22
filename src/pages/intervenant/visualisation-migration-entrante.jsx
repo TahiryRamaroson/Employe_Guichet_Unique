@@ -32,6 +32,33 @@ import { jwtDecode } from "jwt-decode";
   
   export function VisualisationMigrationEntrante() {
 
+    const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkToken = () => {
+      const token = sessionStorage.getItem('authToken');
+
+      if (!token) {
+        navigate('/auth/sign-in');
+      }
+
+      try {
+        const decodedtoken = jwtDecode(token);
+        const now = Date.now() / 1000;
+        if(now > decodedtoken.exp || decodedtoken.profil != "Intervenant sociaux") {
+          sessionStorage.removeItem('authToken');
+          navigate('/auth/sign-in');
+        }
+      } catch (error) {
+        sessionStorage.removeItem('authToken');
+        navigate('/auth/sign-in');
+      }
+
+    };
+
+    checkToken();
+    }, [navigate]);
+
     return (
       <div className="mt-12 mb-8 flex flex-col gap-12">
     <Card className="h-full w-full">

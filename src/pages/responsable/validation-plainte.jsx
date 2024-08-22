@@ -1,10 +1,6 @@
 import React from "react";
 import data_plainte from "../../data/plainte";
 import data_historique_action from "../../data/historique_action";
-//import XLSX from 'xlsx';
-//import jsPDF from 'jspdf';
-//import 'jspdf-autotable';
-//import html2canvas from 'html2canvas';
 
 import {
     Card,
@@ -37,6 +33,33 @@ import { jwtDecode } from "jwt-decode";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
   
   export function ValidationPlainte() {
+
+    const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkToken = () => {
+      const token = sessionStorage.getItem('authToken');
+
+      if (!token) {
+        navigate('/auth/sign-in');
+      }
+
+      try {
+        const decodedtoken = jwtDecode(token);
+        const now = Date.now() / 1000;
+        if(now > decodedtoken.exp || decodedtoken.profil != "Responsable guichet unique") {
+          sessionStorage.removeItem('authToken');
+          navigate('/auth/sign-in');
+        }
+      } catch (error) {
+        sessionStorage.removeItem('authToken');
+        navigate('/auth/sign-in');
+      }
+
+    };
+
+    checkToken();
+    }, [navigate]);
 
     const [open, setOpen] = React.useState(false);
  

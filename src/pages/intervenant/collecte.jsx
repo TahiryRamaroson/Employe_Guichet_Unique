@@ -3,20 +3,44 @@ import {
   Typography,
   Card,
   CardBody,
-  CardHeader,
   Input,
   Button,
 } from "@material-tailwind/react";
 import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import Chart from "react-apexcharts";
 import { ChevronRightIcon, MagnifyingGlassIcon} from "@heroicons/react/24/solid";
 import { useNavigate, Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import NumberFormatter from "@/widgets/layout/number-formatter";
 
 export function Collecte() {
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkToken = () => {
+      const token = sessionStorage.getItem('authToken');
+
+      if (!token) {
+        navigate('/auth/sign-in');
+      }
+
+      try {
+        const decodedtoken = jwtDecode(token);
+        const now = Date.now() / 1000;
+        if(now > decodedtoken.exp || decodedtoken.profil != "Intervenant sociaux") {
+          sessionStorage.removeItem('authToken');
+          navigate('/auth/sign-in');
+        }
+      } catch (error) {
+        sessionStorage.removeItem('authToken');
+        navigate('/auth/sign-in');
+      }
+
+    };
+
+    checkToken();
+    }, [navigate]);
 
   return (
     <div className="mt-12">
@@ -45,7 +69,7 @@ export function Collecte() {
                   CIN: 145823475
                 </Typography>
                 <Typography className="mb-4">
-                  Fokotany: Kianja
+                  Fokontany: Kianja
                 </Typography>
               </CardBody>
             </Card>

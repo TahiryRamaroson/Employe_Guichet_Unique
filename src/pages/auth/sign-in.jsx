@@ -1,22 +1,29 @@
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import {
   Input,
   Typography,
+  Dialog,
+  Card,
 } from "@material-tailwind/react";
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 
 
 export function SignIn() {
   const navigate = useNavigate();
 
-  // État local pour suivre les valeurs du formulaire
   const [formData, setFormData] = useState({
-    mail: 'admin@gmail.com',
-    password: 'admin',
+    email: '',
+    motDePasse: '',
   });
 
-  // Gestionnaire d'événement pour la saisie des champs
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(!open);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -25,18 +32,16 @@ export function SignIn() {
     });
   };
 
-  // Gestionnaire d'événement pour la soumission du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const apiUrl = "https://api-finalclouds5-production.up.railway.app/utilisateurs/admin/login"; 
+    const apiUrl = "https://localhost:7128/api/Auth/utilisateur/login"; 
   
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Vous pouvez ajouter des en-têtes supplémentaires si nécessaire, par exemple pour l'authentification
           // 'Authorization': 'Bearer ' + votreToken,
         },
         body: JSON.stringify(formData),
@@ -48,17 +53,27 @@ export function SignIn() {
   
       const responseData = await response.json();
 
-    if (responseData.message == null) {
-      alert('Email ou mot de passe incorrect');
-      return navigate('/auth/sign-in');
+    if (responseData.error) {
+        setErrorMessage(responseData.error);
+        setOpen(true);
+        return navigate('/auth/sign-in');
     }
   
-      const authToken = responseData.result.token;
-      localStorage.setItem("authToken", authToken);
+      const authToken = responseData.token;
+      sessionStorage.setItem("authToken", authToken);
   
-      
-      navigate('/page/accueil');
+      try {
+        const decodedtoken = jwtDecode(authToken);
+        console.log(decodedtoken.profil);
+        if(decodedtoken.profil == "Responsable guichet unique") return navigate('/responsable/planning');
+      } catch (error) {
+        sessionStorage.removeItem('authToken');
+        navigate('/auth/sign-in');
+      }
+      return navigate('/intervenant/collecte');
+
     } catch (error) {
+      alert('Erreur lors de la connexion, veuillez réessayer')
       console.error('Erreur lors de la connexion :', error.message);
     }
   };
@@ -86,8 +101,8 @@ export function SignIn() {
                 className: "before:content-none after:content-none",
               }}
               type="email"
-              name="mail"
-              value={formData.mail}
+              name="email"
+              value={formData.email}
               onChange={handleChange}
             />
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
@@ -101,8 +116,8 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
-              name="password"
-              value={formData.password}
+              name="motDePasse"
+              value={formData.motDePasse}
               onChange={handleChange}
             />
           </div>
@@ -114,6 +129,14 @@ export function SignIn() {
           
 
         </form>
+
+        <Dialog open={open} handler={handleOpen} size="md" className="bg-transparent">
+          <Card color="red" className="w-full text-center flex justify-center opacity-[75%]">
+            <ExclamationCircleIcon className="h-10 w-10 m-auto mt-5" color="white"/>
+            <Typography variant="h3" color="white" className="mt-5">Une erreur s&apos;est produite</Typography>
+            <Typography variant="paragraph" color="white" className="mt-5 mb-5">{errorMessage}</Typography>
+          </Card>
+        </Dialog>
 
       </div>
       <div className="w-2/5 h-full hidden lg:block">
