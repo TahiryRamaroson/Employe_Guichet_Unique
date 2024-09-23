@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from "react";
+import {useEffect, useState, useRef} from "react";
 import Webcam from 'react-webcam';
 import {
   Typography,
@@ -13,13 +13,10 @@ import {
 } from "@material-tailwind/react";
 import {
   CameraIcon,
-  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import Chart from "react-apexcharts";
 import { ChevronLeftIcon, ViewfinderCircleIcon} from "@heroicons/react/24/solid";
 import { useNavigate, Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import NumberFormatter from "@/widgets/layout/number-formatter";
 
 export function FormDeces() {
   const navigate = useNavigate();
@@ -49,15 +46,32 @@ export function FormDeces() {
     checkToken();
   }, [navigate]);
 
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [open, setOpen] = useState(false);
   const webcamRef = useRef(null);
 
-  const takePhoto = () => {
-    const photo = webcamRef.current.getScreenshot();
-    console.log('Photo taken:', photo);
-    setSelectedImage(photo);
-  };
+  const handleOpen = () => setOpen(!open);
 
-  const [selectedImage, setSelectedImage] = useState(null);
+  const capture = () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    setSelectedImage(imageSrc);
+
+    // Convert the base64 image to a file
+    const byteString = atob(imageSrc.split(',')[1]);
+    const mimeString = imageSrc.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeString });
+    const file = new File([blob], 'webcam-photo.jpg', { type: mimeString });
+
+    // Create a new DataTransfer to add the file to the input
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    document.getElementById('fileInput').files = dataTransfer.files;
+  };
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -69,11 +83,6 @@ export function FormDeces() {
       reader.readAsDataURL(file);
     }
   };
-
-
-  const [open, setOpen] = React.useState(false);
- 
-  const handleOpen = () => setOpen(!open);
 
   return (
     <div className="mt-12">
@@ -109,14 +118,14 @@ export function FormDeces() {
                     <DialogBody>
                       {open && <Webcam ref={webcamRef} className="rounded"/>}
                       <div className="col-span-1 md:col-span-3 flex justify-center mt-5 mb-5">
-                      <Button onClick={takePhoto} variant="gradient" className="rounded-full" color="green">
+                      <Button onClick={capture} variant="gradient" className="rounded-full" color="green">
                         <ViewfinderCircleIcon className="h-5 w-5"/>
                       </Button>
                       </div>
                     </DialogBody>
                   </Dialog>
                   
-                    <Input size="lg" label="Pièce justificative (faire part, acte de décès,...)" color="green" type="file" variant="standard" accept="image/*" capture="user" onChange={handleImageChange}/>
+                    <Input onChange={handleImageChange} size="lg" label="Pièce justificative (faire part, acte de décès,...)" color="green" type="file" variant="standard" accept="image/*" capture="user" id="fileInput"/>
                   </div>
                   {selectedImage && <img src={selectedImage} alt="Selected" className="rounded"/>}
                   <div className="col-span-1 md:col-span-3 flex justify-center mt-5 mb-5">
