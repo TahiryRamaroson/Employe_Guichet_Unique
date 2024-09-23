@@ -1,4 +1,5 @@
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import { api_url } from "@/configs/api-url";
 import {
   Input,
   Typography,
@@ -35,7 +36,7 @@ export function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const apiUrl = "https://localhost:7128/api/Auth/utilisateur/login"; 
+    const apiUrl = `${api_url}/api/Auth/utilisateur/login`; 
   
     try {
       const response = await fetch(apiUrl, {
