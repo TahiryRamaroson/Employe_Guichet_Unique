@@ -87,7 +87,7 @@ export function Collecte() {
         } else {
           sessionStorage.setItem("menage", JSON.stringify(responseData));
           setMenage(responseData);
-          console.log(menage); // Utilisez l'objet menage comme nécessaire
+          console.log(menage);
         }
   
       } catch (error) {
@@ -97,7 +97,6 @@ export function Collecte() {
     };
 
     useEffect(() => {
-      // Récupérer l'objet menage depuis le sessionStorage lors du montage du composant
       const storedMenage = JSON.parse(sessionStorage.getItem('menage'));
       if (storedMenage) {
         setMenage(storedMenage);
@@ -138,7 +137,7 @@ export function Collecte() {
           </div>
           <div className="flex justify-end mt-5">
             <Link to="/intervenant/module">
-              <Button className="flex items-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+              <Button disabled={Object.keys(menage).length === 0} className="flex items-center text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
                 <span className="ml-2">Suivant</span>
                 <ChevronRightIcon className="h-4 w-4" />
               </Button>
