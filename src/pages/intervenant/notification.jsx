@@ -66,8 +66,7 @@ export function Notification() {
     const handleSubmit = async (e) => {
       e.preventDefault();
     
-      if (formData.Objet == '' || formData.Corps == '' 
-      ) {
+      if (formData.Objet == '' || formData.Corps == '') {
         setErrorMessage('Veuillez remplir tous les champs.');
         setOpen(true);
         await new Promise(r => setTimeout(r, 2000));
