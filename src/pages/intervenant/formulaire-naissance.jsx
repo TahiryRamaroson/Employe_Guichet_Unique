@@ -1,5 +1,7 @@
-import React, {useEffect, useState, useRef} from "react";
+import {useEffect, useState, useRef} from "react";
 import Webcam from 'react-webcam';
+import axios from 'axios';
+import { api_url } from "@/configs/api-url";
 import {
   Typography,
   Card,
@@ -13,6 +15,8 @@ import {
 } from "@material-tailwind/react";
 import {
   CameraIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronLeftIcon, ViewfinderCircleIcon} from "@heroicons/react/24/solid";
 import { useNavigate, Link } from "react-router-dom";
@@ -22,32 +26,171 @@ export function FormNaissance() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkToken = () => {
-      const token = sessionStorage.getItem('authToken');
+  const [errorMessage, setErrorMessage] = useState('');
 
-      if (!token) {
-        navigate('/auth/sign-in');
-      }
+  const [openError, setOpenError] = useState(false);
+  const handleOpenError = () => setOpenError(!open);
 
-      try {
-        const decodedtoken = jwtDecode(token);
-        const now = Date.now() / 1000;
-        if(now > decodedtoken.exp || decodedtoken.profil != "Intervenant sociaux") {
-          sessionStorage.removeItem('authToken');
-          navigate('/auth/sign-in');
-        }
-      } catch (error) {
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const handleOpenSuccess = () => setOpenSuccess(!open);
+
+  const [dataPere, setDataPere] = useState([]);
+  const [dataMere, setDataMere] = useState([]);
+
+  const storedMenage = JSON.parse(sessionStorage.getItem('menage'));
+  const token = sessionStorage.getItem('authToken');
+  const decodedtoken = jwtDecode(token);
+  const [formData, setFormData] = useState({
+    NomNouveauNe: '',
+    PrenomNouveauNe: '',
+    DateNaissance: '',
+    NumActeNaissance: '',
+    Sexe: null,
+    Statut: 0,
+    IdFokontany: storedMenage.fokontany.id,
+    IdMenage: storedMenage.id,
+    IdPere: null,
+    IdMere: null,
+    IdIntervenant: +decodedtoken.idutilisateur,
+    IdResponsable: null,
+    PieceJustificative: '',
+  });
+  console.log(formData);
+
+  const checkToken = () => {
+    const token = sessionStorage.getItem('authToken');
+
+    if (!token) {
+      navigate('/auth/sign-in');
+    }
+
+    try {
+      const decodedtoken = jwtDecode(token);
+      const now = Date.now() / 1000;
+      if(now > decodedtoken.exp || decodedtoken.profil != "Intervenant sociaux") {
         sessionStorage.removeItem('authToken');
         navigate('/auth/sign-in');
       }
+    } catch (error) {
+      sessionStorage.removeItem('authToken');
+      navigate('/auth/sign-in');
+    }
 
-    };
+  };
 
+  const getPere = async () => {
+  
+    const apiPere = `${api_url}/api/Naissances/pere/${storedMenage.id}`; 
+    console.log("apiPere :", apiPere);
+    try {
+      const reponsePere = await fetch(apiPere, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+        },
+      });
+      if (!reponsePere.ok) {
+        throw new Error('Erreur lors de la demande.');
+      }
+      const data = await reponsePere.json();
+      setDataPere(data);
+      console.log("dataPere après la mise à jour d'état :", data);
+    } catch (error) {
+      console.error("Error: " + error.message);
+    }
+
+  };
+
+  const getMere = async () => {
+  
+    const apiMere = `${api_url}/api/Naissances/mere/${storedMenage.id}`; 
+    console.log("apiMere :", apiMere);
+    try {
+      const reponseMere = await fetch(apiMere, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+        },
+      });
+      if (!reponseMere.ok) {
+        throw new Error('Erreur lors de la demande.');
+      }
+      const data = await reponseMere.json();
+      if (data.error) {
+        setErrorMessage(data.error);
+        setOpenError(true);
+        await new Promise(r => setTimeout(r, 2000));
+        setOpenError(false);
+        navigate('/intervenant/module');
+      }
+      setDataMere(data);
+      console.log("dataMere après la mise à jour d'état :", data);
+    } catch (error) {
+      console.error("Error: " + error.message);
+    }
+
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (formData.NomNouveauNe == '' || formData.PrenomNouveauNe == '' || formData.Sexe == null || formData.IdPere == null ||
+      formData.DateNaissance == '' || formData.PieceJustificative == '' || formData.email == '' || formData.IdMere == null
+    ) {
+      setErrorMessage('Veuillez remplir tous les champs.');
+      setOpenError(true);
+      await new Promise(r => setTimeout(r, 2000));
+      setOpenError(false);
+    }
+
+    const foData = new FormData();
+    foData.append('NomNouveauNe', formData.NomNouveauNe);
+    foData.append('PrenomNouveauNe', formData.PrenomNouveauNe);
+    foData.append('DateNaissance', formData.DateNaissance);
+    foData.append('NumActeNaissance', formData.NumActeNaissance);
+    foData.append('Sexe', formData.Sexe);
+    foData.append('PieceJustificative', formData.PieceJustificative);
+    foData.append('Statut', formData.Statut);
+    foData.append('IdFokontany', formData.IdFokontany);
+    foData.append('IdMenage', formData.IdMenage);
+    foData.append('IdPere', formData.IdPere);
+    foData.append('IdMere', formData.IdMere);
+    foData.append('IdIntervenant', formData.IdIntervenant);
+    foData.append('IdResponsable', formData.IdResponsable);
+
+    try {
+      const response = await axios.post(`${api_url}/api/Naissances`, formData, {
+        headers: {
+          'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      if(response.data.error){
+        setErrorMessage(response.data.error);
+        setOpenError(true);
+        await new Promise(r => setTimeout(r, 2000));
+        setOpenError(false);
+        return;
+      }
+      console.log(response.data);
+      setOpenSuccess(true);
+      await new Promise(r => setTimeout(r, 500));
+      setOpenSuccess(false);
+    } catch (error) {
+      console.error(error);
+
+    }
+  };
+
+  useEffect(() => {
     checkToken();
+    getPere();
+    getMere();
     }, [navigate]);
 
-    const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [open, setOpen] = useState(false);
   const webcamRef = useRef(null);
 
@@ -66,7 +209,11 @@ export function FormNaissance() {
       ia[i] = byteString.charCodeAt(i);
     }
     const blob = new Blob([ab], { type: mimeString });
-    const file = new File([blob], 'webcam-photo.jpg', { type: mimeString });
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[-:.]/g, '');
+    const filename = `naissance-pj-photo-${timestamp}.jpg`;
+    const file = new File([blob], filename, { type: mimeString });
+    formData.PieceJustificative = file;
 
     // Create a new DataTransfer to add the file to the input
     const dataTransfer = new DataTransfer();
@@ -83,6 +230,40 @@ export function FormNaissance() {
       };
       reader.readAsDataURL(file);
     }
+    formData.PieceJustificative = event.target.files[0];
+  };  
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+    console.log(name, value);
+  };
+
+  const changeSelectPere = (value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      IdPere: value,
+    }));
+  };
+
+  const changeSelectMere = (value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      IdMere: value,
+    }));
+  };
+
+  const getPereNameById = (id) => {
+    const pere = dataPere.find(pere => pere.id === id);
+    return pere ? pere.nom + " " + pere.prenom : '';
+  };
+
+  const getMereNameById = (id) => {
+    const mere = dataMere.find(mere => mere.id === id);
+    return mere ? mere.nom + " " + mere.prenom : '';
   };
 
   return (
@@ -95,28 +276,38 @@ export function FormNaissance() {
                 </Typography>
               </div>
               <CardBody>
-                <form className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6" encType="multipart/form-data">
                   <div className="flex flex-col gap-12">
-                    <Input size="lg" label="Nom du nouveau né" color="green" variant="standard"/>
-                    <Input size="lg" label="Date de naissance" color="green" type="date" variant="standard"/>
-                    <Input size="lg" label="Numéro de l'acte de naissance" color="green" variant="standard"/>
+                    <Input value={formData.NomNouveauNe} onChange={handleChange} size="lg" label="Nom du nouveau né" name="NomNouveauNe" color="green" variant="standard"/>
+                    <Input value={formData.DateNaissance} onChange={handleChange} size="lg" label="Date de naissance" name="DateNaissance" color="green" type="date" variant="standard"/>
+                    <Input value={formData.NumActeNaissance} onChange={handleChange} size="lg" label="Numéro de l'acte de naissance" name="NumActeNaissance" color="green" variant="standard"/>
                   </div>
                   <div className="flex flex-col gap-12">
-                    <Input size="lg" label="Prénom(s) du nouveau né" color="green" variant="standard"/>
-                    <Input size="lg" label="Lieu de naissance" color="green" variant="standard"/>
-                    <Select label="Sexe" name="newMarque" size="lg" color="green" variant="standard">
-                        <Option value="">Masculin</Option>
-                        <Option value="">Féminin</Option>
+                    <Input value={formData.PrenomNouveauNe} onChange={handleChange} size="lg" label="Prénom(s) du nouveau né" name="PrenomNouveauNe" color="green" variant="standard"/>
+                    <Select selected={(element) =>
+                              {
+                               if (element) {
+                                const selectedValue = element.props.value;
+                                formData.Sexe = selectedValue;
+                                if(selectedValue == 0) return "Femme"
+                                return "Homme";
+                               }
+                              }
+                            } label="Sexe" name="Sexe" size="lg" color="green" variant="standard">
+                        <Option value={1}>Homme</Option>
+                        <Option value={0}>Femme</Option>
                     </Select>
                   </div>
                   <div className="flex flex-col gap-12">
-                    <Select label="Père" name="newMarque" size="lg" color="green" variant="standard">
-                        <Option value="">Koto</Option>
-                        <Option value="">Bema</Option>
+                    <Select selected={() =>{return getPereNameById(formData.IdPere)}} onChange={(e) => changeSelectPere(e)} value={formData.IdPere} label="Père" name="IdPere" size="lg" color="green" variant="standard">
+                                {dataPere && dataPere.map(({id, nom, prenom}) => (
+                                  <Option key={id} value={id}>{nom} {prenom}</Option>
+                                ))};
                     </Select>
-                    <Select label="Mère" name="newMarque" size="lg" color="green" variant="standard">
-                        <Option value="">Soa</Option>
-                        <Option value="">Fara</Option>
+                    <Select selected={() =>{return getMereNameById(formData.IdMere)}} onChange={(e) => changeSelectMere(e)} value={formData.IdMere} label="Mère" name="IdMere" size="lg" color="green" variant="standard">
+                                {dataMere && dataMere.map(({id, nom, prenom}) => (
+                                  <Option key={id} value={id}>{nom} {prenom}</Option>
+                                ))};
                     </Select>
                   </div>
                   <div className="col-span-1 md:col-span-3 flex justify-center mt-5 mb-5">
@@ -134,7 +325,7 @@ export function FormNaissance() {
                     </DialogBody>
                   </Dialog>
                   
-                    <Input onChange={handleImageChange} size="lg" label="Pièce justificative" color="green" type="file" variant="standard" accept="image/*" capture="user" id="fileInput"/>
+                    <Input onChange={handleImageChange} size="lg" label="Pièce justificative" name="PieceJustificative" color="green" type="file" variant="standard" accept="image/*" capture="user" id="fileInput"/>
                   </div>
                   {selectedImage && <img src={selectedImage} alt="Selected" className="rounded"/>}
                   <div className="col-span-1 md:col-span-3 flex justify-center mt-5 mb-5">
@@ -154,6 +345,20 @@ export function FormNaissance() {
               </Button>
             </Link>
           </div>
+
+          <Dialog open={openError} handler={handleOpenError} size="md" className="bg-transparent">
+          <Card color="red" className="w-full text-center flex justify-center opacity-[75%]">
+            <ExclamationCircleIcon className="h-10 w-10 m-auto mt-5" color="white"/>
+            <Typography variant="h3" color="white" className="mt-5">Une erreur s&apos;est produite</Typography>
+            <Typography variant="paragraph" color="white" className="mt-5 mb-5">{errorMessage}</Typography>
+          </Card>
+        </Dialog>
+
+        <Dialog open={openSuccess} handler={handleOpenSuccess} size="sm" className="bg-transparent">
+          <Card color="green" className="w-full text-center flex justify-center opacity-[75%]">
+            <CheckCircleIcon className="h-10 w-10 m-auto mt-5 mb-5" color="white"/>
+          </Card>
+        </Dialog>
     </div>
   );
 }
