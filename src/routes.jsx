@@ -4,8 +4,9 @@ import {
   ArrowPathRoundedSquareIcon,
   Squares2X2Icon,
   TableCellsIcon,
+  BellIcon
 } from "@heroicons/react/24/solid";
-import { Collecte, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, VisualisationMigrationEntrante, VisualisationMigrationSortante, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante} from "@/pages/intervenant";
+import { Collecte, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, VisualisationMigrationEntrante, VisualisationMigrationSortante, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante, Notification} from "@/pages/intervenant";
 import { Planning, ValidationNaissance, ValidationGrossesse, ValidationDeces, ValidationPlainte, ValidationMigrationEntrante, ValidationMigrationSortante} from "@/pages/responsable";
 import { SignIn, SignUp } from "@/pages/auth";
 import { ExclamationTriangleIcon, FaceSmileIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, ChatBubbleOvalLeftEllipsisIcon, CalendarDaysIcon, CalendarIcon } from "@heroicons/react/24/outline";
@@ -30,6 +31,13 @@ export const routes = [
         name: "Visualisation",
         path: "/visualisation",
         element: <Visualisation />,
+        op: "",
+      },
+      {
+        icon: <BellIcon {...icon} />,
+        name: "Notification",
+        path: "/notification",
+        element: <Notification />,
         op: "",
       },
       {
