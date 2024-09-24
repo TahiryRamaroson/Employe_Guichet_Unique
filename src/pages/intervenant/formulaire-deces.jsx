@@ -220,7 +220,7 @@ export function FormDeces() {
       ...formData,
       [name]: value,
     });
-
+    console.log("formData après la mise à jour d'état :", formData);
     if (name === 'DateDeces') {
       calculateAge(value, getDateNaissanceById(formData.IdDefunt));
       setIsAgeDisabled(value !== '');
