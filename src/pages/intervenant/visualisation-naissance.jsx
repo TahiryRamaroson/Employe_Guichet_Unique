@@ -323,8 +323,6 @@ import { jwtDecode } from "jwt-decode";
             </div>
           </form>
         </Card>
-
-        
       
       <CardBody className="overflow-scroll px-0">
         <table className="w-full min-w-max table-auto" id="mydata">
@@ -469,7 +467,7 @@ import { jwtDecode } from "jwt-decode";
           <tbody>
           {dataNaissance && dataNaissance.map((item) => (
                   <tr key={item.id}>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
@@ -478,7 +476,7 @@ import { jwtDecode } from "jwt-decode";
                             {item.menage ? item.menage.numeroMenage : ''}
                           </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
@@ -487,7 +485,7 @@ import { jwtDecode } from "jwt-decode";
                             {item.nomNouveauNe} {item.prenomNouveauNe}
                           </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
@@ -496,7 +494,7 @@ import { jwtDecode } from "jwt-decode";
                             <DateFormatter date={item.dateNaissance} />
                           </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
@@ -505,7 +503,7 @@ import { jwtDecode } from "jwt-decode";
                           {item.lieuNaissance ? item.lieuNaissance.nom : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
@@ -514,7 +512,7 @@ import { jwtDecode } from "jwt-decode";
                             {item.numActeNaissance}
                           </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
@@ -534,7 +532,7 @@ import { jwtDecode } from "jwt-decode";
                             </Tooltip>
                           </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Tooltip placement="top" color="light" content={item.pere ? "CIN: " + item.pere.cin : ''}>
                             <Typography
                               variant="small"
@@ -545,7 +543,7 @@ import { jwtDecode } from "jwt-decode";
                             </Typography>
                           </Tooltip>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Tooltip placement="top" color="light" content={item.mere ? "CIN: " + item.mere.cin : ''}>
                           <Typography
                             variant="small"
@@ -556,7 +554,7 @@ import { jwtDecode } from "jwt-decode";
                           </Typography>
                         </Tooltip>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
@@ -565,13 +563,13 @@ import { jwtDecode } from "jwt-decode";
                             {item.intervenant ? item.intervenant.nom : ''} {item.intervenant ? item.intervenant.prenom : ''}
                           </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
                             className="font-normal"
                           >
-                            {item.responsable ? item.responsable.nom : '-'} {item.responsable ? item.responsable.prenom : ''}
+                            {item.responsable ? item.responsable.nom : ''} {item.responsable ? item.responsable.prenom : ''}
                           </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">

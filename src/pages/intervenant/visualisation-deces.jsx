@@ -1,10 +1,4 @@
-import React, { useRef } from "react";
-import data_deces from "../../data/deces";
-import * as XLSX from 'xlsx';
-import * as FileSaver from 'file-saver';
-import { CSVLink } from 'react-csv';
-
-
+import { api_url } from "@/configs/api-url";
 import {
     Card,
     CardBody,
@@ -19,12 +13,13 @@ import {
     SpeedDialAction,
     SpeedDialContent,
     SpeedDialHandler,
-    IconButton
+    IconButton,
+    Tooltip
   } from "@material-tailwind/react";
 
 import DateFormatter from "@/widgets/layout/date-formatter";
 
-import {PlusIcon, ArrowUpTrayIcon, DocumentIcon} from "@heroicons/react/24/solid";
+import {ArrowUpTrayIcon, DocumentIcon, PhotoIcon} from "@heroicons/react/24/solid";
 
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +29,19 @@ import { jwtDecode } from "jwt-decode";
 
     const navigate = useNavigate();
 
-  useEffect(() => {
+    const [dataCauseDeces, setDataCauseDeces] = useState([]);
+    const [dataDeces, setDataDeces] = useState([]);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isFiltered, setIsFiltered] = useState(false);
+
+    const [formFiltre, setFormFiltre] = useState({
+      numeroMenage: '',
+      dateDeces: null,
+      causeDeces: -1,
+      statut: -1
+    });
+
     const checkToken = () => {
       const token = sessionStorage.getItem('authToken');
 
@@ -56,49 +63,201 @@ import { jwtDecode } from "jwt-decode";
 
     };
 
-    checkToken();
+    const downloadCSV = async () => {
+      try {
+        const response = await fetch(`${api_url}/api/Deces/export/csv`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error('Erreur lors du téléchargement du fichier');
+        }
+    
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `deces_${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (error) {
+        console.error('Erreur:', error);
+      }
+    };
+
+    const downloadExcel = async () => {
+      try {
+        const response = await fetch(`${api_url}/api/Deces/export/excel`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error('Erreur lors du téléchargement du fichier');
+        }
+    
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `deces_${new Date().toISOString()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (error) {
+        console.error('Erreur:', error);
+      }
+    };
+
+    const getDeces = async (pageNumber) => {
+  
+      const apiDeces = `${api_url}/api/Deces/page/${pageNumber}`; 
+
+      try {
+        const reponseDeces = await fetch(apiDeces, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseDeces.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseDeces.json();
+        setDataDeces(data.deces);
+        setTotalPages(data.totalPages);
+        console.log("dataDeces après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
+    const getFilteredDeces = async (pageNumber) => {
+    
+      const apiFiltre = `${api_url}/api/Deces/filtre/page/${pageNumber}`;
+  
+      try {
+        const response = await fetch(apiFiltre , {
+          method: 'POST', 
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+          body: JSON.stringify(formFiltre),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+  
+        const data = await response.json();
+        console.log('Réponse de API Filtre :', data);
+        setDataDeces(data.deces);
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        console.error('Erreur lors de la soumission du formulaire :', error.message);
+      }
+    };
+
+    const getCauseDeces = async () => {
+  
+      const apiCauseDeces = `${api_url}/api/CauseDeces`; 
+
+      try {
+        const reponseCauseDeces = await fetch(apiCauseDeces, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseCauseDeces.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseCauseDeces.json();
+        setDataCauseDeces(data);
+        console.log("dataCauseDeces après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
+    const submitFiltre = async (e) => {
+      e.preventDefault();
+
+      setIsFiltered(true);
+      setPageNumber(1);
+    };
+
+    useEffect(() => {
+      checkToken();
+      getCauseDeces();
     }, [navigate]);
 
-    const flattenObject = (obj) => {
-      const result = {};
-      function flatten(obj, prefix = '') {
-        for (const key in obj) {
-          if (typeof obj[key] === 'object' && obj[key] !== null) {
-            flatten(obj[key], prefix + key + '.');
-          } else {
-            result[prefix + key] = obj[key];
-          }
+    useEffect(() => {
+      if (isFiltered) {
+        getFilteredDeces(pageNumber);
+        getCauseDeces();
+        } else {
+        getDeces(pageNumber);
         }
-      }
-      flatten(obj);
-      return result;
+    }, [pageNumber, isFiltered]);
+
+    const handlePreviousPage = () => {
+      setPageNumber((prevPage) => Math.max(prevPage - 1, 1));
     };
-    
-    const exportToExcel = (data, fileName) => {
-      const flattenedData = data.map(item => flattenObject(item));
-    
-      const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-      const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      data = new Blob([excelBuffer], 
-     { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'});
-      FileSaver.saveAs(data, fileName + '.xlsx'); 
-    
+      
+    const handleNextPage = () => {
+      setPageNumber((prevPage) => Math.min(prevPage + 1, totalPages));
     };
 
-    const exportToCsv = (data, fileName) => {
-      const csvContent = "data:text/csv;charset=utf-8," +
-      data.map(row => {
-        // Assuming you want specific properties like id and nom from Defunt
-        return `${row.Defunt.id},${row.Defunt.nom}`; 
-      }).join("\n");
-    
-      const link = document.createElement("a");
-      link.href = encodeURI(csvContent);
-      link.setAttribute("download", `${fileName}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    const getCauseDecesNameById = (id) => {
+      const CauseDeces = dataCauseDeces.find(CauseDeces => CauseDeces.id === id);
+      return CauseDeces ? CauseDeces.nom : '';
+    };
+
+    const changeFiltre = (e) => {
+      const { name, value } = e.target;
+      setFormFiltre({
+        ...formFiltre,
+        [name]: value,
+      });
+      console.log(formFiltre);
+    };
+  
+    const changeFiltreSelectCauseDeces = (value) => {
+      setFormFiltre((prevFormModif) => ({
+        ...prevFormModif,
+        causeDeces: value,
+      }));
+    };
+  
+    const changeFiltreSelectStatut = (value) => {
+      setFormFiltre((prevFormModif) => ({
+        ...prevFormModif,
+        statut: value,
+      }));
+    };
+
+    const resetFiltre = () => {
+      setFormFiltre((prevFormFiltre) => ({
+        ...prevFormFiltre,
+        numeroMenage: '',
+        dateDeces: null,
+        causeDeces: -1,
+        statut: -1
+      }));
+      setIsFiltered(false);
+      setPageNumber(1);
     };
 
     return (
@@ -111,25 +270,24 @@ import { jwtDecode } from "jwt-decode";
           >
             Visualisation des décès
           </Typography>
-          <CSVLink data={data_deces} filename="my-data.csv">
-            Télécharger le CSV
-          </CSVLink>
 
           <Card color="transparent" shadow={false} className="p-6 text-center mb-8">
             <SpeedDial placement="bottom">
-              <SpeedDialHandler>
-                <IconButton size="lg" className="rounded-full" color="gray">
-                  <ArrowUpTrayIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </IconButton>
-              </SpeedDialHandler>
+              <Tooltip placement="top" color="light" content="Exporter" delay={500}>
+                <SpeedDialHandler>
+                  <IconButton size="lg" className="rounded-full" color="gray">
+                    <ArrowUpTrayIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                  </IconButton>
+                </SpeedDialHandler>
+              </Tooltip>
               <SpeedDialContent className="flex-row">
-                <SpeedDialAction className="h-16 w-16" onClick={() => exportToExcel(data_deces, 'Data_deces')}>
+                <SpeedDialAction onClick={downloadExcel} className="h-16 w-16 hover:animate-pulse">
                   <DocumentIcon className="h-5 w-5" />
                   <Typography color="blue-gray" className="text-xs font-normal">
                     Excel
                   </Typography>
                 </SpeedDialAction>
-                <SpeedDialAction className="h-16 w-16" onClick={() => exportToCsv(data_deces, 'Data_deces')}>
+                <SpeedDialAction onClick={downloadCSV} className="h-16 w-16 hover:animate-pulse">
                   <DocumentIcon className="h-5 w-5" />
                   <Typography color="blue-gray" className="text-xs font-normal">
                     CSV
@@ -140,29 +298,54 @@ import { jwtDecode } from "jwt-decode";
           </Card>
 
         <Card color="transparent" shadow={false} className="p-6">
-          <form className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <form onSubmit={submitFiltre} className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <div className="flex flex-col gap-4">
-              <Input size="lg" label="Numéro ménage" color="green"/>
+            <Input value={formFiltre.numeroMenage} onChange={changeFiltre} size="lg" label="Numéro ménage" name="numeroMenage" color="green"/>
             </div>
             <div className="flex flex-col gap-4">
-              <Input size="lg" label="Date de décès" color="green" type="date"/>
+              <Input value={formFiltre.dateDeces || ''} onChange={changeFiltre} size="lg" label="Date de décès" name="dateDeces" color="green" type="date"/>
             </div>
             <div className="flex flex-col gap-4">
-              <Select label="Cause du décès" name="newMarque" size="lg" color="green">
-                  <Option value="">Accident</Option>
-                  <Option value="">Cancer</Option>
-                  <Option value="">Assassinat</Option>
+              <Select
+                color="green"
+                label="Cause du décès"
+                name="causeDeces"
+                size="lg"
+                value={formFiltre.causeDeces}
+                onChange={(e) => changeFiltreSelectCauseDeces(e)}
+                selected={() =>{return getCauseDecesNameById(formFiltre.causeDeces)}}
+              >
+                  {dataCauseDeces && dataCauseDeces.map(({id, nom}) => (
+                    <Option key={id} value={id}>{nom}</Option>
+                  ))};
               </Select>
             </div>
             <div className="flex flex-col gap-4">
-              <Select label="Statut" name="newMarque" size="lg" color="green">
-                  <Option value="">Validé</Option>
-                  <Option value="">En attente</Option>
+            <Select selected={(element) =>
+                {
+                 if (element) {
+                  const selectedValue = element.props.value;
+                  if(selectedValue == 0) return "En attente";
+                  return "Validé";
+                 }
+                }
+              } 
+              value={formFiltre.statut}
+              onChange={(e) => changeFiltreSelectStatut(e)}
+              label="Statut" 
+              name="statut" 
+              size="lg" 
+              color="green">
+                  <Option value={5}>Validé</Option>
+                  <Option value={0}>En attente</Option>
               </Select>
             </div>
             <div className="flex flex-col gap-4">
               <Button variant="outlined" color="green" className="border-2" type="submit" fullWidth={false}>
                 Filtrer
+              </Button>
+              <Button onClick={resetFiltre} variant="gradient" color="red" type="button" fullWidth={false}>
+                Réinitialiser
               </Button>
             </div>
           </form>
@@ -278,33 +461,33 @@ import { jwtDecode } from "jwt-decode";
             </tr>
           </thead>
           <tbody>
-          {data_deces && data_deces.map((item) => (
+          {dataDeces && dataDeces.map((item) => (
                   <tr key={item.id}>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.Menage ? item.Menage.Numero_menage : ''}
+                          {item.defunt.menage ? item.defunt.menage.numeroMenage : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                           <Typography
                             variant="small"
                             color="blue-gray"
                             className="font-normal"
                           >
-                            {item.Defunt ? item.Defunt.nom : ''} {item.Defunt ? item.Defunt.prenom : ''}
+                            {item.defunt ? item.defunt.nom : ''} {item.defunt ? item.defunt.prenom : ''}
                           </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          <DateFormatter date={item.date_deces} />
+                          <DateFormatter date={item.dateDeces} />
                         </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -313,7 +496,16 @@ import { jwtDecode } from "jwt-decode";
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.age_defunt}
+                          {item.ageDefunt}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.causeDeces ? item.causeDeces.nom : ''}
                         </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -322,34 +514,27 @@ import { jwtDecode } from "jwt-decode";
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.cause_deces ? item.cause_deces.nom : ''}
+                            <Tooltip placement="top" color="light" content={<img src={item.pieceJustificative} style={{ width: '225px', height: '200px' }}/>} >
+                              <PhotoIcon className="h-5 w-5 m-auto" />
+                            </Tooltip>
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.Piece_justificative}
+                          {item.intervenant ? item.intervenant.nom : ''} {item.intervenant ? item.intervenant.prenom : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.intervenant ? item.intervenant.nom : ''}
-                        </Typography>
-                    </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {item.responsable ? item.responsable.nom : ''}
+                          {item.responsable ? item.responsable.nom : ''} {item.responsable ? item.responsable.prenom : ''}
                         </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -359,11 +544,11 @@ import { jwtDecode } from "jwt-decode";
                           className="font-normal"
                         >
                           <Chip
-                          variant="ghost"
-                          color="green"
-                          size="sm"
-                          value={item.statut}
-                        />
+                            variant="ghost"
+                            color={item.statut == 5 ? 'green' : 'amber'}
+                            size="sm"
+                            value={item.statut == 5 ? 'Validé' : 'En attente'}
+                          />
                         </Typography>
                     </td>
 
@@ -372,19 +557,19 @@ import { jwtDecode } from "jwt-decode";
           </tbody>
         </table>
       </CardBody>
-      <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 ">
-        <Typography variant="small" color="blue-gray" className="font-normal">
-          Page 1 sur 10
-        </Typography>
-        <div className="flex gap-2">
-          <Button variant="outlined" size="sm">
+      <CardFooter className="flex items-center justify-between border-t border-blue-gray-50">
+          <Typography variant="small" color="blue-gray" className="font-normal">
+            Page {pageNumber} sur {totalPages === 0 ? 1 : totalPages}
+          </Typography>
+          <div className="flex gap-2">
+          <Button variant="outlined" size="sm" onClick={handlePreviousPage} disabled={pageNumber === 1}>
             Précédent
           </Button>
-          <Button variant="outlined" size="sm">
+          <Button variant="outlined" size="sm" onClick={handleNextPage} disabled={pageNumber === totalPages}>
             Suivant
           </Button>
-        </div>
-      </CardFooter>
+          </div>
+        </CardFooter>
     </Card>
         
       </div>
