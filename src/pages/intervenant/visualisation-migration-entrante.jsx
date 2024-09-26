@@ -1,10 +1,4 @@
-import React from "react";
-import data_migration_entrante from "../../data/migration_entrante";
-//import XLSX from 'xlsx';
-//import jsPDF from 'jspdf';
-//import 'jspdf-autotable';
-//import html2canvas from 'html2canvas';
-
+import { api_url } from "@/configs/api-url";
 import {
     Card,
     CardBody,
@@ -19,12 +13,13 @@ import {
     SpeedDialAction,
     SpeedDialContent,
     SpeedDialHandler,
-    IconButton
+    IconButton,
+    Tooltip
   } from "@material-tailwind/react";
 
 import DateFormatter from "@/widgets/layout/date-formatter";
 
-import {PlusIcon, ArrowUpTrayIcon, DocumentIcon} from "@heroicons/react/24/solid";
+import {ArrowUpTrayIcon, DocumentIcon, PhotoIcon} from "@heroicons/react/24/solid";
 
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +29,19 @@ import { jwtDecode } from "jwt-decode";
 
     const navigate = useNavigate();
 
-  useEffect(() => {
+    const [dataMotifMigration, setDataMotifMigration] = useState([]);
+    const [dataMigrationEntrante, setDataMigrationEntrante] = useState([]);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isFiltered, setIsFiltered] = useState(false);
+
+    const [formFiltre, setFormFiltre] = useState({
+      numeroMenage: '',
+      motifMigration: -1,
+      statutResidence: -1,
+      statut: -1
+    });
+
     const checkToken = () => {
       const token = sessionStorage.getItem('authToken');
 
@@ -56,8 +63,209 @@ import { jwtDecode } from "jwt-decode";
 
     };
 
-    checkToken();
+    const downloadCSV = async () => {
+      try {
+        const response = await fetch(`${api_url}/api/MigrationEntrantes/export/csv`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error('Erreur lors du téléchargement du fichier');
+        }
+    
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `migration_entrante_${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (error) {
+        console.error('Erreur:', error);
+      }
+    };
+
+    const downloadExcel = async () => {
+      try {
+        const response = await fetch(`${api_url}/api/MigrationEntrantes/export/excel`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error('Erreur lors du téléchargement du fichier');
+        }
+    
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `migration_entrante_${new Date().toISOString()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (error) {
+        console.error('Erreur:', error);
+      }
+    };
+
+    const getMigrationEntrante = async (pageNumber) => {
+  
+      const apiMigrationEntrante = `${api_url}/api/MigrationEntrantes/page/${pageNumber}`; 
+
+      try {
+        const reponseMigrationEntrante = await fetch(apiMigrationEntrante, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseMigrationEntrante.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseMigrationEntrante.json();
+        setDataMigrationEntrante(data.migrationEntrante);
+        setTotalPages(data.totalPages);
+        console.log("dataMigrationEntrante après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
+    const getFilteredMigrationEntrante = async (pageNumber) => {
+    
+      const apiFiltre = `${api_url}/api/MigrationEntrantes/filtre/page/${pageNumber}`;
+  
+      try {
+        const response = await fetch(apiFiltre , {
+          method: 'POST', 
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+          body: JSON.stringify(formFiltre),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+  
+        const data = await response.json();
+        console.log('Réponse de API Filtre :', data);
+        setDataMigrationEntrante(data.migrationEntrante);
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        console.error('Erreur lors de la soumission du formulaire :', error.message);
+      }
+    };
+
+    const getMotifMigration = async () => {
+  
+      const apiMotifMigration = `${api_url}/api/MotifMigrations`; 
+
+      try {
+        const reponseMotifMigration = await fetch(apiMotifMigration, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseMotifMigration.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseMotifMigration.json();
+        setDataMotifMigration(data);
+        console.log("dataMotifMigration après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
+    const submitFiltre = async (e) => {
+      e.preventDefault();
+
+      setIsFiltered(true);
+      setPageNumber(1);
+    };
+
+    useEffect(() => {
+      checkToken();
+      getMotifMigration();
     }, [navigate]);
+
+    useEffect(() => {
+      if (isFiltered) {
+        getFilteredMigrationEntrante(pageNumber);
+        getMotifMigration();
+        } else {
+        getMigrationEntrante(pageNumber);
+        }
+    }, [pageNumber, isFiltered]);
+
+    const handlePreviousPage = () => {
+      setPageNumber((prevPage) => Math.max(prevPage - 1, 1));
+    };
+      
+    const handleNextPage = () => {
+      setPageNumber((prevPage) => Math.min(prevPage + 1, totalPages));
+    };
+
+    const getMotifMigrationNameById = (id) => {
+      const MotifMigration = dataMotifMigration.find(MotifMigration => MotifMigration.id === id);
+      return MotifMigration ? MotifMigration.nom : '';
+    };
+
+    const changeFiltre = (e) => {
+      const { name, value } = e.target;
+      setFormFiltre({
+        ...formFiltre,
+        [name]: value,
+      });
+      console.log(formFiltre);
+    };
+  
+    const changeFiltreSelectMotifMigration = (value) => {
+      setFormFiltre((prevFormModif) => ({
+        ...prevFormModif,
+        motifMigration: value,
+      }));
+    };
+  
+    const changeFiltreSelectStatutResidence = (value) => {
+      setFormFiltre((prevFormModif) => ({
+        ...prevFormModif,
+        statutResidence: value,
+      }));
+    };
+
+    const changeFiltreSelectStatut = (value) => {
+      setFormFiltre((prevFormModif) => ({
+        ...prevFormModif,
+        statut: value,
+      }));
+    };
+
+    const resetFiltre = () => {
+      setFormFiltre((prevFormFiltre) => ({
+        ...prevFormFiltre,
+        numeroMenage: '',
+        motifMigration: -1,
+        statutResidence: -1,
+        statut: -1
+      }));
+      setIsFiltered(false);
+      setPageNumber(1);
+    };
 
     return (
       <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -72,28 +280,24 @@ import { jwtDecode } from "jwt-decode";
 
           <Card color="transparent" shadow={false} className="p-6 text-center mb-8">
             <SpeedDial placement="bottom">
-              <SpeedDialHandler>
-                <IconButton size="lg" className="rounded-full" color="gray">
-                  <ArrowUpTrayIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </IconButton>
-              </SpeedDialHandler>
+              <Tooltip placement="top" color="light" content="Exporter" delay={500}>
+                <SpeedDialHandler>
+                  <IconButton size="lg" className="rounded-full" color="gray">
+                    <ArrowUpTrayIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                  </IconButton>
+                </SpeedDialHandler>
+              </Tooltip>
               <SpeedDialContent className="flex-row">
-                <SpeedDialAction className="h-16 w-16">
+                <SpeedDialAction onClick={downloadExcel} className="h-16 w-16 hover:animate-pulse">
                   <DocumentIcon className="h-5 w-5" />
                   <Typography color="blue-gray" className="text-xs font-normal">
                     Excel
                   </Typography>
                 </SpeedDialAction>
-                <SpeedDialAction className="h-16 w-16">
+                <SpeedDialAction onClick={downloadCSV} className="h-16 w-16 hover:animate-pulse">
                   <DocumentIcon className="h-5 w-5" />
                   <Typography color="blue-gray" className="text-xs font-normal">
                     CSV
-                  </Typography>
-                </SpeedDialAction>
-                <SpeedDialAction className="h-16 w-16">
-                  <DocumentIcon className="h-5 w-5" />
-                  <Typography color="blue-gray" className="text-xs font-normal">
-                    PDF
                   </Typography>
                 </SpeedDialAction>
               </SpeedDialContent>
@@ -101,31 +305,71 @@ import { jwtDecode } from "jwt-decode";
           </Card>
 
         <Card color="transparent" shadow={false} className="p-6">
-          <form className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <form onSubmit={submitFiltre} className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <div className="flex flex-col gap-4">
-              <Input size="lg" label="Numéro ménage" color="green"/>
+            <Input value={formFiltre.numeroMenage} onChange={changeFiltre} size="lg" label="Numéro ménage" name="numeroMenage" color="green"/>
             </div>
             <div className="flex flex-col gap-4">
-              <Select label="Motif" name="newMarque" size="lg" color="green">
-                  <Option value="">étude</Option>
-                  <Option value="">urgence familiale</Option>
+            <Select
+                color="green"
+                label="Motif"
+                name="motifMigration"
+                size="lg"
+                value={formFiltre.motifMigration}
+                onChange={(e) => changeFiltreSelectMotifMigration(e)}
+                selected={() =>{return getMotifMigrationNameById(formFiltre.motifMigration)}}
+              >
+                  {dataMotifMigration && dataMotifMigration.map(({id, nom}) => (
+                    <Option key={id} value={id}>{nom}</Option>
+                  ))};
               </Select>
             </div>
             <div className="flex flex-col gap-4">
-              <Select label="Statut de résidence" name="newMarque" size="lg" color="green">
-                  <Option value="">temporaire</Option>
-                  <Option value="">permanent</Option>
+            <Select selected={(element) =>
+                {
+                 if (element) {
+                  const selectedValue = element.props.value;
+                  if(selectedValue == 10) return "Permanent";
+                  return "Temporaire";
+                 }
+                }
+              } 
+              value={formFiltre.statutResidence}
+              onChange={(e) => changeFiltreSelectStatutResidence(e)}
+              label="Statut de résidence" 
+              name="statutResidence" 
+              size="lg" 
+              color="green">
+                  <Option value={-10}>Temporaire</Option>
+                  <Option value={10}>Permanent</Option>
               </Select>
             </div>
             <div className="flex flex-col gap-4">
-              <Select label="Statut" name="newMarque" size="lg" color="green">
-                  <Option value="">Validé</Option>
-                  <Option value="">En attente</Option>
+            <Select selected={(element) =>
+                {
+                 if (element) {
+                  const selectedValue = element.props.value;
+                  if(selectedValue == 0) return "En attente";
+                  return "Validé";
+                 }
+                }
+              } 
+              value={formFiltre.statut}
+              onChange={(e) => changeFiltreSelectStatut(e)}
+              label="Statut" 
+              name="statut" 
+              size="lg" 
+              color="green">
+                  <Option value={5}>Validé</Option>
+                  <Option value={0}>En attente</Option>
               </Select>
             </div>
             <div className="flex flex-col gap-4">
               <Button variant="outlined" color="green" className="border-2" type="submit" fullWidth={false}>
                 Filtrer
+              </Button>
+              <Button onClick={resetFiltre} variant="gradient" color="red" type="button" fullWidth={false}>
+                Réinitialiser
               </Button>
             </div>
           </form>
@@ -146,7 +390,18 @@ import { jwtDecode } from "jwt-decode";
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
-                    Numéro ménage
+                    Ancien ménage
+                  </Typography>
+                </th>
+                <th
+                  className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                >
+                  <Typography
+                    variant="paragraph"
+                    color="blue-gray"
+                    className="font-normal leading-none opacity-70"
+                  >
+                    Nouveau ménage
                   </Typography>
                 </th>
                 <th
@@ -223,7 +478,7 @@ import { jwtDecode } from "jwt-decode";
                     color="blue-gray"
                     className="font-normal leading-none opacity-70"
                   >
-                    Fokotany d&apos;origine
+                    Fokontany d&apos;origine
                   </Typography>
                 </th>
                 <th
@@ -296,15 +551,51 @@ import { jwtDecode } from "jwt-decode";
             </tr>
           </thead>
           <tbody>
-          {data_migration_entrante && data_migration_entrante.map((item) => (
+          {dataMigrationEntrante && dataMigrationEntrante.map((item) => (
                   <tr key={item.id}>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.nouveau_menage ? item.nouveau_menage.Numero_menage : ''} 
+                          {item.ancienMenage ? item.ancienMenage.numeroMenage : ''} 
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.nouveauMenage ? item.nouveauMenage.numeroMenage : ''} 
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.individu ? item.individu.nom : ''} {item.individu ? item.individu.prenom : ''}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.motifMigration ? item.motifMigration.nom : ''}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          <DateFormatter date={item.dateArrivee}/>
                         </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -313,47 +604,20 @@ import { jwtDecode } from "jwt-decode";
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.Individu ? item.Individu.nom : ''} {item.Individu ? item.Individu.prenom : ''}
+                          {item.statutResidence === -10 ? 'Temporaire' : 'Permanent'}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {item.motif ? item.motif.description : ''}
-                        </Typography>
-                    </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          <DateFormatter date={item.date_arrivee}/>
-                        </Typography>
-                    </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {item.statut_residence}
-                        </Typography>
-                    </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
                         
-                        {item.date_rentree === "" ? (
-                          <span>-</span>
+                        {item.dateRentree == null ? (
+                          <span></span>
                         ) : (
-                          <DateFormatter date={item.date_rentree} />
+                          <DateFormatter date={item.dateRentree} />
                         )}
                         </Typography>
                     </td>
@@ -363,61 +627,63 @@ import { jwtDecode } from "jwt-decode";
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.piece_justificative}
+                            <Tooltip placement="top" color="light" content={<img src={item.pieceJustificative} style={{ width: '225px', height: '200px' }}/>} >
+                              <PhotoIcon className="h-5 w-5 m-auto" />
+                            </Tooltip>
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.ancien_menage.Fokotany ? item.ancien_menage.Fokotany.nom : ''}
+                          {item.ancienMenage.fokontany ? item.ancienMenage.fokontany.nom : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.ancien_menage.Fokotany.Commune ? item.ancien_menage.Fokotany.Commune.nom : ''}
+                          {item.ancienMenage.fokontany.commune ? item.ancienMenage.fokontany.commune.nom : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.ancien_menage.Fokotany.Commune.District ? item.ancien_menage.Fokotany.Commune.District.nom : ''}
+                          {item.ancienMenage.fokontany.commune.district ? item.ancienMenage.fokontany.commune.district.nom : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.ancien_menage.Fokotany.Commune.District.Region ? item.ancien_menage.Fokotany.Commune.District.Region.nom : ''}
+                          {item.ancienMenage.fokontany.commune.district.region ? item.ancienMenage.fokontany.commune.district.region.nom : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.intervenant ? item.intervenant.nom : ''}
+                          {item.intervenant ? item.intervenant.nom : ''} {item.intervenant ? item.intervenant.prenom : ''}
                         </Typography>
                     </td>
-                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {item.responsable ? item.responsable.nom : ''}
+                          {item.responsable ? item.responsable.nom : ''} {item.responsable ? item.responsable.prenom : ''}
                         </Typography>
                     </td>
                     <td className="p-4 border-b border-blue-gray-50 text-center">
@@ -427,11 +693,11 @@ import { jwtDecode } from "jwt-decode";
                           className="font-normal"
                         >
                           <Chip
-                          variant="ghost"
-                          color="green"
-                          size="sm"
-                          value={item.statut}
-                        />
+                            variant="ghost"
+                            color={item.statut == 5 ? 'green' : 'amber'}
+                            size="sm"
+                            value={item.statut == 5 ? 'Validé' : 'En attente'}
+                          />
                         </Typography>
                     </td>
 
@@ -440,19 +706,19 @@ import { jwtDecode } from "jwt-decode";
           </tbody>
         </table>
       </CardBody>
-      <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 ">
-        <Typography variant="small" color="blue-gray" className="font-normal">
-          Page 1 sur 10
-        </Typography>
-        <div className="flex gap-2">
-          <Button variant="outlined" size="sm">
+      <CardFooter className="flex items-center justify-between border-t border-blue-gray-50">
+          <Typography variant="small" color="blue-gray" className="font-normal">
+            Page {pageNumber} sur {totalPages === 0 ? 1 : totalPages}
+          </Typography>
+          <div className="flex gap-2">
+          <Button variant="outlined" size="sm" onClick={handlePreviousPage} disabled={pageNumber === 1}>
             Précédent
           </Button>
-          <Button variant="outlined" size="sm">
+          <Button variant="outlined" size="sm" onClick={handleNextPage} disabled={pageNumber === totalPages}>
             Suivant
           </Button>
-        </div>
-      </CardFooter>
+          </div>
+        </CardFooter>
     </Card>
         
       </div>
