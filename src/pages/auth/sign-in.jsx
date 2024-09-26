@@ -43,7 +43,6 @@ export function SignIn() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': 'Bearer ' + votreToken,
         },
         body: JSON.stringify(formData),
       });

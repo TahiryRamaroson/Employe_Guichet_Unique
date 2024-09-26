@@ -95,6 +95,15 @@ export function FormMigrationEntrante() {
         throw new Error('Erreur lors de la demande.');
       }
       const data = await reponseIndividu.json();
+
+      if (data.error) {
+        setErrorMessage(data.error);
+        setOpenError(true);
+        await new Promise(r => setTimeout(r, 2000));
+        setOpenError(false);
+        navigate('/intervenant/module');
+      }
+
       setDataIndividu(data);
       console.log("dataIndividu après la mise à jour d'état :", data);
     } catch (error) {
