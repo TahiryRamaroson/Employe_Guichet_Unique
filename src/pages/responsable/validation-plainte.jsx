@@ -46,12 +46,20 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
     const closeDrawerCSV = () => setOpenCSV(false);
     const [fileCSV, setFileCSV] = useState(null);
 
+    const [openModele, setOpenModele] = useState(false);
+    const openDrawerModele = () => setOpenModele(true);
+    const closeDrawerModele = () => setOpenModele(false);
+    const [fileModele, setFileModele] = useState(null);
+
     const [errorMessage, setErrorMessage] = useState('');
     const [openError, setOpenError] = useState(false);
     const handleOpenError = () => setOpenError(!open);
 
     const [openSuccess, setOpenSuccess] = useState(false);
     const handleOpenSuccess = () => setOpenSuccess(!open);
+
+    const [openPatienter, setOpenPatienter] = useState(false);
+    const handleOpenPatienter = () => setOpenPatienter(!open);
 
     const [dataCategoriePlainte, setDataCategoriePlainte] = useState([]);
     const [dataPlainte, setDataPlainte] = useState([]);
@@ -152,6 +160,32 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
       }
     };
 
+    const downloadModel = async () => {
+      try {
+        const response = await fetch(`${api_url}/api/Plaintes/export/modele`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error('Erreur lors du téléchargement du fichier');
+        }
+    
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `modele_${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (error) {
+        console.error('Erreur:', error);
+      }
+    };
+
     const importCSV = async (event) => {
       event.preventDefault();
       if (!fileCSV) {
@@ -197,6 +231,39 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
   
       try {
         const response = await axios.post(`${api_url}/api/Plaintes/import/excel`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if(response.data.error){
+          setErrorMessage(response.data.error);
+          setOpenError(true);
+          await new Promise(r => setTimeout(r, 2000));
+          setOpenError(false);
+          return;
+        }
+        console.log('Réponse du serveur:', response.data);
+        setOpenSuccess(true);
+          await new Promise(r => setTimeout(r, 500));
+        setOpenSuccess(false);
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi du fichier:', error);
+      }
+    };
+
+    const importModele = async (event) => {
+      event.preventDefault();
+      if (!fileModele) {
+        alert('Veuillez sélectionner un fichier');
+        return;
+      }
+  
+      const formData = new FormData();
+      formData.append('Fichier', fileModele);
+  
+      try {
+        const response = await axios.post(`${api_url}/api/Plaintes/import/modele`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
@@ -626,6 +693,43 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
 
     };
 
+    const Entrainement = async () => {
+
+      setOpenPatienter(true);
+  
+      const apiEntrainement = `${api_url}/api/Plaintes/entrainement`; 
+
+      try {
+        const reponseEntrainement = await fetch(apiEntrainement, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseEntrainement.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseEntrainement.json();
+        setOpenPatienter(false);
+        if(data.error){
+          setErrorMessage(data.error);
+          setOpenError(true);
+          await new Promise(r => setTimeout(r, 2000));
+          setOpenError(false);
+          return;
+        }
+        setOpenSuccess(true);
+        await new Promise(r => setTimeout(r, 500));
+        setOpenSuccess(false);
+        setOpen(false);
+        console.log("dataEntrainement après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
     useEffect(() => {
       checkToken();
       getCategoriePlainte();
@@ -782,6 +886,10 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
       setFileExcel(event.target.files[0]);
     };
 
+    const handleFileModeleChange = (event) => {
+      setFileModele(event.target.files[0]);
+    };
+
     const handleChangeActionPlainte = (event) => {
       const options = event.target.options;
       const selectedValues = [];
@@ -833,16 +941,31 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
             </form>
         </Drawer>
 
+        <Drawer placement="left" open={openModele} onClose={closeDrawerModele} className="p-4 text-center">
+            <div className="text-center">
+              <Typography variant="h5" color="black">
+                Modèle d&apos;entrainement
+              </Typography>
+            </div>
+            <form onSubmit={importModele} className="flex flex-col gap-6 p-4" encType="multipart/form-data">
+              <Typography variant="h6" color="blue-gray" className="-mb-3">
+                Importer un fichier CSV
+              </Typography>
+              <Input name="Fichier" type="file" onChange={handleFileModeleChange} />
+              <Button type="submit" color="green" variant="gradient" fullWidth={false}>Importer</Button>
+            </form>
+        </Drawer>
+
         <div className="flex items-center gap-4">
-          <Button color="blue" variant="gradient" className="flex items-center">
+          <Button onClick={Entrainement} color="blue" variant="gradient" className="flex items-center">
             <SparklesIcon className="h-5 w-5 mr-2 animate-bounce" />
             <span>Entrainer le modèle</span>
           </Button>
-          <Button color="blue" variant="outlined" className="flex items-center border-2">
+          <Button onClick={openDrawerModele} color="blue" variant="outlined" className="flex items-center border-2">
             <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
             <span>Importer un modèle</span>
           </Button>
-          <Button color="blue" variant="outlined" className="flex items-center border-2">
+          <Button onClick={downloadModel} color="blue" variant="outlined" className="flex items-center border-2">
             <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
             <span>Exporter un modèle</span>
           </Button>
@@ -1633,6 +1756,13 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
         <Dialog open={openSuccess} handler={handleOpenSuccess} size="sm" className="bg-transparent">
           <Card color="green" className="w-full text-center flex justify-center opacity-[75%]">
             <CheckCircleIcon className="h-10 w-10 m-auto mt-5 mb-5" color="white"/>
+          </Card>
+        </Dialog>
+
+        <Dialog open={openPatienter} handler={handleOpenPatienter} size="xxl" className="bg-transparent">
+          <Card color="blue" className="w-full h-full text-center flex justify-center">
+            <SparklesIcon className="h-20 w-20 m-auto mt-100 animate-bounce" color="white"/>
+            <Typography variant="h5" color="white" className="mt-5 mb-5 animate-pulse">Veuillez patienter un moment...</Typography>
           </Card>
         </Dialog>
 
