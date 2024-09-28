@@ -1,6 +1,4 @@
 import React from "react";
-import data_plainte from "../../data/plainte";
-import data_historique_action from "../../data/historique_action";
 import { api_url } from "@/configs/api-url";
 import axios from "axios";
 import {
@@ -22,17 +20,17 @@ import {
     Checkbox,
     Dialog,
     DialogBody,
-    Drawer
+    Drawer,
   } from "@material-tailwind/react";
 
 import DateFormatter from "@/widgets/layout/date-formatter";
 
-import {CheckIcon, XMarkIcon, ArrowUpTrayIcon, DocumentIcon, ArrowDownTrayIcon} from "@heroicons/react/24/solid";
+import {CheckIcon, XMarkIcon, ArrowUpTrayIcon, DocumentIcon, ArrowDownTrayIcon, SparklesIcon} from "@heroicons/react/24/solid";
 
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from "@heroicons/react/24/outline";
   
   export function ValidationPlainte() {
 
@@ -57,6 +55,7 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
 
     const [dataCategoriePlainte, setDataCategoriePlainte] = useState([]);
     const [dataPlainte, setDataPlainte] = useState([]);
+    const [dataActionPlainte, setDataActionPlainte] = useState([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isFiltered, setIsFiltered] = useState(false);
@@ -66,6 +65,18 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
       dateFait: null,
       idCategoriePlainte: -1,
       statut: -1
+    });
+
+    const [dataPlainteSuivi, setDataPlainteSuivi] = useState([]);
+    const [pageNumberSuivi, setPageNumberSuivi] = useState(1);
+    const [totalPagesSuivi, setTotalPagesSuivi] = useState(1);
+    const [isFilteredSuivi, setIsFilteredSuivi] = useState(false);
+
+    const [formFiltreSuivi, setFormFiltreSuivi] = useState({
+      numeroMenage: '',
+      dateFait: null,
+      idCategoriePlainte: -1,
+      statutTraitement: -1
     });
 
     const checkToken = () => {
@@ -290,6 +301,13 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
       setPageNumber(1);
     };
 
+    const submitFiltreSuivi = async (e) => {
+      e.preventDefault();
+
+      setIsFilteredSuivi(true);
+      setPageNumberSuivi(1);
+    };
+
     const ValiderById = async (id) => {
   
       const apiValiderById = `${api_url}/api/Plaintes/valider/${id}`; 
@@ -448,9 +466,170 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
       }
     };
 
+    const getPlainteSuivi = async (pageNumber) => {
+  
+      const apiPlainte = `${api_url}/api/Plaintes/valide/page/${pageNumber}`; 
+
+      try {
+        const reponsePlainte = await fetch(apiPlainte, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponsePlainte.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponsePlainte.json();
+        setDataPlainteSuivi(data.plainte);
+        setTotalPagesSuivi(data.totalPages);
+        console.log("dataPlainte après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
+    const getFilteredPlainteSuivi = async (pageNumberSuivi) => {
+    
+      const apiFiltre = `${api_url}/api/Plaintes/filtre/valide/page/${pageNumberSuivi}`;
+  
+      try {
+        const response = await fetch(apiFiltre , {
+          method: 'POST', 
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+          body: JSON.stringify(formFiltreSuivi),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+  
+        const data = await response.json();
+        console.log('Réponse de API Filtre :', data);
+        setDataPlainteSuivi(data.plainte);
+        setTotalPagesSuivi(data.totalPages);
+      } catch (error) {
+        console.error('Erreur lors de la soumission du formulaire :', error.message);
+      }
+    };
+
+    const handleSubmitHistorique = async (event) => {
+      event.preventDefault();
+  
+      if (dateVisite == '' || selectedActionPlainte.length == 0) {
+        setErrorMessage('Veuillez remplir tous les champs.');
+        setOpenError(true);
+        await new Promise(r => setTimeout(r, 2000));
+        setOpenError(false);
+      }
+
+      const data = {
+        dateVisite: dateVisite,
+        actions: selectedActionPlainte
+      };
+
+      console.log(`${api_url}/api/Plaintes/Actions/${idPlainte}`);
+      try {
+        const response = await axios.post(`${api_url}/api/Plaintes/Actions/${idPlainte}`, data, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken')
+          }
+        });
+        if(response.data.error){
+          setErrorMessage(response.data.error);
+          setOpenError(true);
+          await new Promise(r => setTimeout(r, 2000));
+          setOpenError(false);
+          return;
+        }
+        console.log(response.data);
+        if (isFilteredSuivi) {
+          getFilteredPlainteSuivi(pageNumberSuivi);
+          } else {
+          getPlainteSuivi(pageNumberSuivi);
+          }
+        setOpenSuccess(true);
+        await new Promise(r => setTimeout(r, 500));
+        setOpenSuccess(false);
+        setOpen(false);
+      } catch (error) {
+        console.error(error);
+  
+      }
+    };
+
+    const getActionPlainte = async () => {
+  
+      const apiActionPlainte = `${api_url}/api/Actions`; 
+      try {
+        const reponseActionPlainte = await fetch(apiActionPlainte, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseActionPlainte.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseActionPlainte.json();
+        setDataActionPlainte(data);
+        console.log("dataActionPlainte après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+  
+    };
+
+    const CloturerById = async (id) => {
+  
+      const apiCloturerById = `${api_url}/api/Plaintes/cloturer/${id}`; 
+
+      try {
+        const reponseCloturerById = await fetch(apiCloturerById, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseCloturerById.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseCloturerById.json();
+        if(data.error){
+          setErrorMessage(data.error);
+          setOpenError(true);
+          await new Promise(r => setTimeout(r, 2000));
+          setOpenError(false);
+          return;
+        }
+        setOpenSuccess(true);
+        await new Promise(r => setTimeout(r, 500));
+        setOpenSuccess(false);
+        setOpen(false);
+        if (isFilteredSuivi) {
+          getFilteredPlainteSuivi(pageNumberSuivi);
+          } else {
+          getPlainteSuivi(pageNumberSuivi);
+          }
+        console.log("dataCloturerById après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
     useEffect(() => {
       checkToken();
       getCategoriePlainte();
+      getActionPlainte();
     }, [navigate]);
 
     useEffect(() => {
@@ -462,12 +641,29 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
         }
     }, [pageNumber, isFiltered]);
 
+    useEffect(() => {
+      if (isFilteredSuivi) {
+        getFilteredPlainteSuivi(pageNumberSuivi);
+        getCategoriePlainte();
+        } else {
+        getPlainteSuivi(pageNumberSuivi);
+        }
+    }, [pageNumberSuivi, isFilteredSuivi]);
+
     const handlePreviousPage = () => {
       setPageNumber((prevPage) => Math.max(prevPage - 1, 1));
     };
       
     const handleNextPage = () => {
       setPageNumber((prevPage) => Math.min(prevPage + 1, totalPages));
+    };
+
+    const handlePreviousPageSuivi = () => {
+      setPageNumberSuivi((prevPage) => Math.max(prevPage - 1, 1));
+    };
+      
+    const handleNextPageSuivi = () => {
+      setPageNumberSuivi((prevPage) => Math.min(prevPage + 1, totalPagesSuivi));
     };
 
     const getCategoriePlainteNameById = (id) => {
@@ -483,9 +679,25 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
       });
       console.log(formFiltre);
     };
+
+    const changeFiltreSuivi = (e) => {
+      const { name, value } = e.target;
+      setFormFiltreSuivi({
+        ...formFiltreSuivi,
+        [name]: value,
+      });
+      console.log(formFiltreSuivi);
+    };
   
     const changeFiltreSelectCategoriePlainte = (value) => {
       setFormFiltre((prevFormModif) => ({
+        ...prevFormModif,
+        idCategoriePlainte: value,
+      }));
+    };
+
+    const changeFiltreSelectCategoriePlainteSuivi = (value) => {
+      setFormFiltreSuivi((prevFormModif) => ({
         ...prevFormModif,
         idCategoriePlainte: value,
       }));
@@ -495,6 +707,13 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
       setFormFiltre((prevFormModif) => ({
         ...prevFormModif,
         statut: value,
+      }));
+    };
+
+    const changeFiltreSelectStatutTraitement = (value) => {
+      setFormFiltreSuivi((prevFormModif) => ({
+        ...prevFormModif,
+        statutTraitement: value,
       }));
     };
 
@@ -510,9 +729,31 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
       setPageNumber(1);
     };
 
+    const resetFiltreSuivi = () => {
+      setFormFiltreSuivi((prevFormFiltre) => ({
+        ...prevFormFiltre,
+        numeroMenage: '',
+        dateFait: null,
+        idCategoriePlainte: -1,
+        statutTraitement: -1
+      }));
+      setIsFilteredSuivi(false);
+      setPageNumberSuivi(1);
+    };
+
     const [open, setOpen] = React.useState(false);
- 
-    const handleOpen = () => setOpen(!open);
+    const [dataHistorique, setDataHistorique] = useState([]);
+    const [idPlainte, setIdPlainte] = useState(null);
+    const [statutTraitement, setStatuTraitement] = useState(null);
+    const [selectedActionPlainte, setSelectedActionPlainte] = useState([]);
+    const [dateVisite, setDateVisite] = useState('');
+
+    const handleOpen = (item) => {
+      setDataHistorique(item.historiqueActionPlaintes);
+      setIdPlainte(item.id);
+      setStatuTraitement(item.statutTraitement);
+      setOpen(!open);
+      };
 
     const getCheckedIds = () => {
       return Object.keys(checkedItems).filter(id => checkedItems[id]);
@@ -539,6 +780,24 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
 
     const handleFileExcelChange = (event) => {
       setFileExcel(event.target.files[0]);
+    };
+
+    const handleChangeActionPlainte = (event) => {
+      const options = event.target.options;
+      const selectedValues = [];
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].selected) {
+          selectedValues.push(options[i].value);
+        }
+      }
+      setSelectedActionPlainte(selectedValues);
+      console.log("selectedActionPlaintes-------------------------------------- :", selectedActionPlainte);
+    };
+
+    const changeDateVisite = (e) => {
+      const { value } = e.target;
+      setDateVisite(value);
+      console.log(dateVisite);
     };
 
     return (
@@ -573,6 +832,21 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
               <Button type="submit" color="green" variant="gradient" fullWidth={false}>Importer</Button>
             </form>
         </Drawer>
+
+        <div className="flex items-center gap-4">
+          <Button color="blue" variant="gradient" className="flex items-center">
+            <SparklesIcon className="h-5 w-5 mr-2 animate-bounce" />
+            <span>Entrainer le modèle</span>
+          </Button>
+          <Button color="blue" variant="outlined" className="flex items-center border-2">
+            <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
+            <span>Importer un modèle</span>
+          </Button>
+          <Button color="blue" variant="outlined" className="flex items-center border-2">
+            <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
+            <span>Exporter un modèle</span>
+          </Button>
+        </div>
 
       <Card className="h-full w-full">
           <Typography
@@ -948,32 +1222,59 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
               </Typography>
 
             <Card color="transparent" shadow={false} className="p-6 mt-6">
-              <form className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                <div className="flex flex-col gap-4">
-                  <Input size="lg" label="Numéro ménage" color="green"/>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <Input size="lg" label="Date du fait" color="green" type="date"/>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <Select label="Catégorie" name="newMarque" size="lg" color="green">
-                      <Option value="">électricité</Option>
-                      <Option value="">eau</Option>
-                      <Option value="">sécurité</Option>
-                  </Select>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <Select label="Statut" name="newMarque" size="lg" color="green">
-                      <Option value="">Validé</Option>
-                      <Option value="">En attente</Option>
-                  </Select>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <Button variant="outlined" color="green" className="border-2" type="submit" fullWidth={false}>
-                    Filtrer
-                  </Button>
-                </div>
-              </form>
+            <form onSubmit={submitFiltreSuivi} className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <div className="flex flex-col gap-4">
+            <Input value={formFiltreSuivi.numeroMenage} onChange={changeFiltreSuivi} size="lg" label="Numéro ménage" name="numeroMenage" color="green"/>
+            </div>
+            <div className="flex flex-col gap-4">
+              <Input value={formFiltreSuivi.dateFait || ''} onChange={changeFiltreSuivi} size="lg" label="Date du fait" name="dateFait" color="green" type="date"/>
+            </div>
+            <div className="flex flex-col gap-4">
+              <Select
+                color="green"
+                label="Catégorie"
+                name="idCategoriePlainte"
+                size="lg"
+                value={formFiltreSuivi.idCategoriePlainte}
+                onChange={(e) => changeFiltreSelectCategoriePlainteSuivi(e)}
+                selected={() =>{return getCategoriePlainteNameById(formFiltreSuivi.idCategoriePlainte)}}
+              >
+                  {dataCategoriePlainte && dataCategoriePlainte.map(({id, nom}) => (
+                    <Option key={id} value={id}>{nom}</Option>
+                  ))};
+              </Select>
+            </div>
+            <div className="flex flex-col gap-4">
+            <Select selected={(element) =>
+                {
+                 if (element) {
+                  const selectedValue = element.props.value;
+                  if(selectedValue == 0) return "Non traité";
+                  if(selectedValue == 5) return "En cours";
+                  return "Traité";
+                 }
+                }
+              } 
+              value={formFiltreSuivi.statutTraitement}
+              onChange={(e) => changeFiltreSelectStatutTraitement(e)}
+              label="Traitement" 
+              name="statutTraitement" 
+              size="lg" 
+              color="green">
+                  <Option value={10}>Traité</Option>
+                  <Option value={5}>En cours</Option>
+                  <Option value={0}>Non traité</Option>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-4">
+              <Button variant="outlined" color="green" className="border-2" type="submit" fullWidth={false}>
+                Filtrer
+              </Button>
+              <Button onClick={resetFiltreSuivi} variant="gradient" color="red" type="button" fullWidth={false}>
+                Réinitialiser
+              </Button>
+            </div>
+          </form>
             </Card>
 
 
@@ -1035,7 +1336,7 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
                         color="blue-gray"
                         className="font-normal leading-none opacity-70"
                       >
-                        Date de saisie
+                        Date du fait
                       </Typography>
                     </th>
                     <th
@@ -1079,201 +1380,101 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
                 </tr>
               </thead>
               <tbody>
-              {data_plainte && data_plainte.map((item) => (
+              {dataPlainteSuivi && dataPlainteSuivi.map((item) => (
                       <tr key={item.id}>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {item.Victime.Menage ? item.Victime.Menage.Numero_menage : ''}
-                            </Typography>
-                        </td>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                              <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                              >
-                                {item.Victime ? item.Victime.nom : ''} {item.Victime ? item.Victime.prenom : ''}
-                              </Typography>
-                        </td>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {item.description_plainte}
-                            </Typography>
-                        </td>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {item.categorie_plainte ? item.categorie_plainte.nom : ''}
-                            </Typography>
-                        </td>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              <DateFormatter date={item.date_fait} />
-                            </Typography>
-                        </td>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {item.intervenant ? item.intervenant.nom : ''}
-                            </Typography>
-                        </td>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {item.responsable ? item.responsable.nom : ''}
-                            </Typography>
-                        </td>
-                        <td className="p-4 border-b border-blue-gray-50 text-center">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              <Chip
-                              variant="ghost"
-                              color="amber"
-                              size="sm"
-                              value={item.statut_traitement}
-                            />
-                            </Typography>
-                        </td>
+                        <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.victime.menage ? item.victime.menage.numeroMenage : ''}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {item.victime ? item.victime.nom : ''} {item.victime ? item.victime.prenom : ''}
+                          </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.description}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.categoriePlainte ? item.categoriePlainte.nom : ''}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          <DateFormatter date={item.dateFait} />
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.intervenant ? item.intervenant.nom : ''} {item.intervenant ? item.intervenant.prenom : ''}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-start">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {item.responsable ? item.responsable.nom : ''} {item.responsable ? item.responsable.prenom : ''}
+                        </Typography>
+                    </td>
+                    <td className="p-4 border-b border-blue-gray-50 text-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          <Chip
+                            variant="ghost"
+                            color={
+                              item.statutTraitement == 10 ? 'green' :
+                              item.statutTraitement == 5 ? 'amber' :
+                              item.statutTraitement == 0 ? 'red' :
+                              'gray'
+                            }
+                            size="sm"
+                            value={
+                              item.statutTraitement == 10 ? 'Traité' :
+                              item.statutTraitement == 5 ? 'En cours' :
+                              item.statutTraitement == 0 ? 'Non traité' :
+                              'gray'
+                            }
+                          />
+                        </Typography>
+                    </td>
                         <td className="p-4 border-b border-blue-gray-50 text-center">
                           <Tooltip content="Action">
-                            <Button onClick={handleOpen} variant="outlined" className="mr-5 border-none">
-                              <ArrowTopRightOnSquareIcon className="h-5 w-5" onClick={handleOpen}/>
+                            <Button onClick={() => handleOpen(item)} variant="outlined" className="mr-5 border-none">
+                              <ArrowTopRightOnSquareIcon className="h-5 w-5"/>
                             </Button>
                           </Tooltip>
-                          <Dialog open={open} handler={handleOpen} className="bg-green" size="lg">
-                            <DialogBody>
-                              <Card className="h-full w-full">
-                                    <Button variant="gradient" color="amber" className="m-auto mt-6 mb-6" type="submit" fullWidth={false} size="lg">
-                                      Cloturer
-                                    </Button>
-                                <form className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-6 ml-6 mr-6">
-                                  <div className="flex flex-col gap-4">
-                                    <Input size="md" label="Date de visite" color="green" type="date"/>
-                                  </div>
-                                  <div className="flex flex-col gap-4">
-                                    <select className="block w-full p-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-green-500" multiple>
-                                        <option value="koto">Appui psychologique</option>
-                                        <option value="bema">Appui financière</option>
-                                    </select>
-                                  </div>
-                                  <div className="flex flex-col gap-4">
-                                    <Button variant="outlined" color="green" className="border-2" type="submit" fullWidth={false}>
-                                      Ajouter
-                                    </Button>
-                                  </div>
-                                </form>
-                                <Typography
-                                variant="paragraph"
-                                color="blue-gray"
-                                className="font-normal ml-5"
-                                >
-                                  Historique:
-                                </Typography>
-                              <CardBody className="overflow-scroll px-0">
-                                <table className="w-full min-w-max table-auto" id="mydata">
-                                  <thead>
-                                    <tr>
-                                        <th
-                                          className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                                        >
-                                          <Typography
-                                            variant="paragraph"
-                                            color="blue-gray"
-                                            className="font-normal leading-none opacity-70"
-                                          >
-                                            Date de visite
-                                          </Typography>
-                                        </th>
-                                        <th
-                                          className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                                        >
-                                          <Typography
-                                            variant="paragraph"
-                                            color="blue-gray"
-                                            className="font-normal leading-none opacity-70"
-                                          >
-                                            Action
-                                          </Typography>
-                                        </th>
-                                        <th
-                                          className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                                        >
-                                          <Typography
-                                            variant="paragraph"
-                                            color="blue-gray"
-                                            className="font-normal leading-none opacity-70"
-                                          >
-                                            Responsable
-                                          </Typography>
-                                        </th>
-
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                  {data_historique_action && data_historique_action.map((item) => (
-                                          <tr key={item.id}>
-                                            <td className="p-4 border-b border-blue-gray-50 text-center">
-                                                  <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                  >
-                                                    <DateFormatter date={item.date_visite} />
-                                                  </Typography>
-                                            </td>
-                                            <td className="p-4 border-b border-blue-gray-50 text-center">
-                                                <Typography
-                                                  variant="small"
-                                                  color="blue-gray"
-                                                  className="font-normal"
-                                                >
-                                                  {item.actions && item.actions.map((action) => (
-                                                    <span key={action.id}>{action.description}, </span>
-                                                  ))}
-                                                </Typography>
-                                            </td>
-                                            <td className="p-4 border-b border-blue-gray-50 text-center">
-                                                <Typography
-                                                  variant="small"
-                                                  color="blue-gray"
-                                                  className="font-normal"
-                                                >
-                                                  {item.responsable ? item.responsable.nom : ''} {item.responsable ? item.responsable.prenom : ''}
-                                                </Typography>
-                                            </td>
-                                  
-                                          </tr>
-                                          ))}
-                                  </tbody>
-                                </table>
-                              </CardBody>
-                              </Card>
-                            </DialogBody>
-                          </Dialog>
                         </td>
               
                       </tr>
@@ -1281,20 +1482,145 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon } fro
               </tbody>
             </table>
           </CardBody>
-          <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 ">
-            <Typography variant="small" color="blue-gray" className="font-normal">
-              Page 1 sur 10
-            </Typography>
-            <div className="flex gap-2">
-              <Button variant="outlined" size="sm">
-                Précédent
-              </Button>
-              <Button variant="outlined" size="sm">
-                Suivant
-              </Button>
-            </div>
-          </CardFooter>
+          <CardFooter className="flex items-center justify-between border-t border-blue-gray-50">
+          <Typography variant="small" color="blue-gray" className="font-normal">
+            Page {pageNumberSuivi} sur {totalPagesSuivi === 0 ? 1 : totalPagesSuivi}
+          </Typography>
+          <div className="flex gap-2">
+          <Button variant="outlined" size="sm" onClick={handlePreviousPageSuivi} disabled={pageNumberSuivi === 1}>
+            Précédent
+          </Button>
+          <Button variant="outlined" size="sm" onClick={handleNextPageSuivi} disabled={pageNumberSuivi === totalPagesSuivi}>
+            Suivant
+          </Button>
+          </div>
+        </CardFooter>
         </Card>
+
+        <Dialog open={open} handler={handleOpen} className="bg-green" size="lg">
+            <DialogBody>
+              <Card className="h-full w-full">
+                    <Button hidden={statutTraitement == 10 ? true : false} onClick={() => CloturerById(idPlainte)} variant="gradient" color="amber" className="m-auto mt-6 mb-6" type="submit" fullWidth={false} size="lg">
+                      Cloturer
+                    </Button>
+                <form onSubmit={handleSubmitHistorique} className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-6 ml-6 mr-6">
+                  <div className="flex flex-col gap-4">
+                  {statutTraitement === 10 ? (
+                    <div></div>
+                  ) : (
+                    <Input value={dateVisite} onChange={changeDateVisite} size="md" label="Date de visite" name="dateVisite" color="green" type="date"/>
+                  )}
+                  </div>
+                  
+                  <div className="flex flex-col gap-4">
+                  {statutTraitement === 10 ? (
+                    <div></div>
+                  ) : (
+                    <select
+                      value={selectedActionPlainte}
+                      onChange={handleChangeActionPlainte}
+                      className="block w-full p-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                      multiple
+                    >
+                      {dataActionPlainte && dataActionPlainte.map(({ id, nom }) => (
+                        <option key={id} value={id}>{nom}</option>
+                      ))}
+                    </select>
+                  )}
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    <Button hidden={statutTraitement == 10 ? true : false} variant="outlined" color="green" className="border-2" type="submit" fullWidth={false}>
+                      Ajouter
+                    </Button>
+                  </div>
+                </form>
+                <Typography
+                variant="paragraph"
+                color="blue-gray"
+                className="font-normal ml-5"
+                >
+                  Historique:
+                </Typography>
+              <CardBody className="overflow-scroll px-0">
+                <table className="w-full min-w-max table-auto" id="mydata">
+                  <thead>
+                    <tr>
+                        <th
+                          className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                        >
+                          <Typography
+                            variant="paragraph"
+                            color="blue-gray"
+                            className="font-normal leading-none opacity-70"
+                          >
+                            Date de visite
+                          </Typography>
+                        </th>
+                        <th
+                          className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                        >
+                          <Typography
+                            variant="paragraph"
+                            color="blue-gray"
+                            className="font-normal leading-none opacity-70"
+                          >
+                            Action
+                          </Typography>
+                        </th>
+                        <th
+                          className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                        >
+                          <Typography
+                            variant="paragraph"
+                            color="blue-gray"
+                            className="font-normal leading-none opacity-70"
+                          >
+                            Responsable
+                          </Typography>
+                        </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {dataHistorique && dataHistorique.map((item) => (
+                          <tr key={item.id}>
+                            <td className="p-4 border-b border-blue-gray-50 text-start">
+                                  <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-normal"
+                                  >
+                                    <DateFormatter date={item.dateVisite} />
+                                  </Typography>
+                            </td>
+                            <td className="p-4 border-b border-blue-gray-50 text-start">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-normal"
+                                >
+                                  {item.idActions && item.idActions.map((action) => (
+                                    <span key={action.id}>{action.nom}, </span>
+                                  ))}
+                                </Typography>
+                            </td>
+                            <td className="p-4 border-b border-blue-gray-50 text-start">
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-normal"
+                                >
+                                  {item.idResponsableNavigation ? item.idResponsableNavigation.nom : ''} {item.idResponsableNavigation ? item.idResponsableNavigation.prenom : ''}
+                                </Typography>
+                            </td>
+                  
+                          </tr>
+                          ))}
+                  </tbody>
+                </table>
+              </CardBody>
+              </Card>
+            </DialogBody>
+        </Dialog>
 
         <Dialog open={openError} handler={handleOpenError} size="md" className="bg-transparent">
           <Card color="red" className="w-full text-center flex justify-center opacity-[75%]">
