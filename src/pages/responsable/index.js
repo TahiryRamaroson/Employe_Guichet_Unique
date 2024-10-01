@@ -5,4 +5,5 @@ export * from "@/pages/responsable/validation-plainte";
 export * from "@/pages/responsable/validation-migration-entrante";
 export * from "@/pages/responsable/validation-migration-sortante";
 export * from "@/pages/responsable/planning";
+export * from "@/pages/responsable/menage-individu";
 

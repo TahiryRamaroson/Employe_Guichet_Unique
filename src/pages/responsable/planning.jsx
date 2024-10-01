@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -7,8 +7,7 @@ import {
   Card,
   CardBody,
 } from "@material-tailwind/react";
-import { ChevronLeftIcon, MagnifyingGlassIcon} from "@heroicons/react/24/solid";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import PlanningDialog from "@/widgets/layout/planning-dialog";
 
@@ -16,30 +15,30 @@ export function Planning() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkToken = () => {
-      const token = sessionStorage.getItem('authToken');
+  const checkToken = () => {
+    const token = sessionStorage.getItem('authToken');
 
-      if (!token) {
-        navigate('/auth/sign-in');
-      }
+    if (!token) {
+      navigate('/auth/sign-in');
+    }
 
-      try {
-        const decodedtoken = jwtDecode(token);
-        const now = Date.now() / 1000;
-        if(now > decodedtoken.exp || decodedtoken.profil != "Responsable guichet unique") {
-          sessionStorage.removeItem('authToken');
-          navigate('/auth/sign-in');
-        }
-      } catch (error) {
+    try {
+      const decodedtoken = jwtDecode(token);
+      const now = Date.now() / 1000;
+      if(now > decodedtoken.exp || decodedtoken.profil != "Responsable guichet unique") {
         sessionStorage.removeItem('authToken');
         navigate('/auth/sign-in');
       }
+    } catch (error) {
+      sessionStorage.removeItem('authToken');
+      navigate('/auth/sign-in');
+    }
 
-    };
+  };
 
+  useEffect(() => {
     checkToken();
-    }, [navigate]);
+  }, [navigate]);
 
     const localizer = momentLocalizer(moment);
 

@@ -7,9 +7,9 @@ import {
   BellIcon
 } from "@heroicons/react/24/solid";
 import { Collecte, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, VisualisationMigrationEntrante, VisualisationMigrationSortante, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante, Notification} from "@/pages/intervenant";
-import { Planning, ValidationNaissance, ValidationGrossesse, ValidationDeces, ValidationPlainte, ValidationMigrationEntrante, ValidationMigrationSortante} from "@/pages/responsable";
+import { MenageIndividu ,Planning, ValidationNaissance, ValidationGrossesse, ValidationDeces, ValidationPlainte, ValidationMigrationEntrante, ValidationMigrationSortante} from "@/pages/responsable";
 import { SignIn, SignUp } from "@/pages/auth";
-import { ExclamationTriangleIcon, FaceSmileIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, ChatBubbleOvalLeftEllipsisIcon, CalendarDaysIcon, CalendarIcon } from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon, FaceSmileIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, ChatBubbleOvalLeftEllipsisIcon, CalendarDaysIcon, CalendarIcon, HomeModernIcon } from "@heroicons/react/24/outline";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -141,6 +141,13 @@ export const routes = [
         name: "Planning GU",
         path: "/planning",
         element: <Planning />,
+        op: "",
+      },
+      {
+        icon: <HomeModernIcon {...icon} />,
+        name: "Menage & Individu",
+        path: "/menage-individu",
+        element: <MenageIndividu />,
         op: "",
       },
       {
