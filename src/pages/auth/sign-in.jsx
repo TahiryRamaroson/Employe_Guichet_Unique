@@ -65,7 +65,7 @@ export function SignIn() {
       try {
         const decodedtoken = jwtDecode(authToken);
         console.log(decodedtoken.profil);
-        if(decodedtoken.profil == "Responsable guichet unique") return navigate('/responsable/planning');
+        if(decodedtoken.profil == "Responsable guichet unique") return navigate('/responsable/menage-individu');
       } catch (error) {
         sessionStorage.removeItem('authToken');
         navigate('/auth/sign-in');

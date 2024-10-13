@@ -6,7 +6,7 @@ import {
   TableCellsIcon,
   BellIcon
 } from "@heroicons/react/24/solid";
-import { Collecte, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, VisualisationMigrationEntrante, VisualisationMigrationSortante, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante, Notification} from "@/pages/intervenant";
+import { NouveauMenage, Collecte, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, VisualisationMigrationEntrante, VisualisationMigrationSortante, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante, Notification} from "@/pages/intervenant";
 import { MenageIndividu ,Planning, ValidationNaissance, ValidationGrossesse, ValidationDeces, ValidationPlainte, ValidationMigrationEntrante, ValidationMigrationSortante} from "@/pages/responsable";
 import { SignIn, SignUp } from "@/pages/auth";
 import { ExclamationTriangleIcon, FaceSmileIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, ChatBubbleOvalLeftEllipsisIcon, CalendarDaysIcon, CalendarIcon, HomeModernIcon } from "@heroicons/react/24/outline";
@@ -24,6 +24,13 @@ export const routes = [
         name: "Collecte",
         path: "/collecte",
         element: <Collecte />,
+        op: "",
+      },
+      {
+        icon: <HomeModernIcon {...icon} />,
+        name: "Nouveau ménage",
+        path: "/nouveau-menage",
+        element: <NouveauMenage />,
         op: "",
       },
       {
@@ -141,7 +148,7 @@ export const routes = [
         name: "Planning GU",
         path: "/planning",
         element: <Planning />,
-        op: "",
+        op: "none",
       },
       {
         icon: <HomeModernIcon {...icon} />,

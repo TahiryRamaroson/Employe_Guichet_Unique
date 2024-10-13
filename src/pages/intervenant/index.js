@@ -14,4 +14,5 @@ export * from "@/pages/intervenant/formulaire-deces";
 export * from "@/pages/intervenant/formulaire-migration-entrante";
 export * from "@/pages/intervenant/formulaire-migration-sortante";
 export * from "@/pages/intervenant/notification";
+export * from "@/pages/intervenant/nouveau-menage";
 
