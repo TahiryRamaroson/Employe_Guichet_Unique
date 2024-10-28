@@ -50,7 +50,7 @@ import {
             color="transparent"
             className="m-0 mb-8 rounded-none border-none border-white/10 pb-8 text-center flex justify-center m-auto"
           >
-            <img src="/public/img/icon_naissance.svg" alt="." className="h-10 w-10" />
+            <img src="/img/icon_naissance.svg" alt="." className="h-10 w-10" />
             
             <Typography
               variant="h1"
@@ -71,7 +71,7 @@ import {
             color="transparent"
             className="m-0 mb-8 rounded-none border-none border-white/10 pb-8 text-center flex justify-center m-auto"
           >
-            <img src="/public/img/icon_grossesse.svg" alt="." className="h-10 w-10" />
+            <img src="/img/icon_grossesse.svg" alt="." className="h-10 w-10" />
             
             <Typography
               variant="h1"
@@ -92,7 +92,7 @@ import {
             color="transparent"
             className="m-0 mb-8 rounded-none border-none border-white/10 pb-8 text-center flex justify-center m-auto"
           >
-            <img src="/public/img/icon_migration.svg" alt="." className="h-10 w-10" />
+            <img src="/img/icon_migration.svg" alt="." className="h-10 w-10" />
             
             <Typography
               variant="h1"
@@ -113,7 +113,7 @@ import {
             color="transparent"
             className="m-0 mb-8 rounded-none border-none border-white/10 pb-8 text-center flex justify-center m-auto"
           >
-            <img src="/public/img/icon_migration.svg" alt="." className="h-10 w-10" />
+            <img src="/img/icon_migration.svg" alt="." className="h-10 w-10" />
             
             <Typography
               variant="h1"
@@ -134,7 +134,7 @@ import {
             color="transparent"
             className="m-0 mb-8 rounded-none border-none border-white/10 pb-8 text-center flex justify-center m-auto"
           >
-            <img src="/public/img/icon_deces.svg" alt="." className="h-10 w-10" />
+            <img src="/img/icon_deces.svg" alt="." className="h-10 w-10" />
             
             <Typography
               variant="h1"
@@ -155,7 +155,7 @@ import {
             color="transparent"
             className="m-0 mb-8 rounded-none border-none border-white/10 pb-8 text-center flex justify-center m-auto"
           >
-            <img src="/public/img/icon_plainte.svg" alt="." className="h-10 w-10" />
+            <img src="/img/icon_plainte.svg" alt="." className="h-10 w-10" />
             
             <Typography
               variant="h1"
