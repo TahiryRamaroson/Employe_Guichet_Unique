@@ -4,7 +4,7 @@ import {
   ArrowPathRoundedSquareIcon,
   Squares2X2Icon,
   TableCellsIcon,
-  BellIcon
+  EnvelopeIcon
 } from "@heroicons/react/24/solid";
 import { NouveauMenage, Collecte, Visualisation, VisualisationNaissance, VisualisationGrossesse, VisualisationDeces, VisualisationPlainte, VisualisationMigrationEntrante, VisualisationMigrationSortante, Module, FormNaissance, FormGrossesse, FormPlainte, FormDeces, FormMigrationEntrante, FormMigrationSortante, Notification} from "@/pages/intervenant";
 import { MenageIndividu ,Planning, ValidationNaissance, ValidationGrossesse, ValidationDeces, ValidationPlainte, ValidationMigrationEntrante, ValidationMigrationSortante} from "@/pages/responsable";
@@ -41,8 +41,8 @@ export const routes = [
         op: "",
       },
       {
-        icon: <BellIcon {...icon} />,
-        name: "Notification",
+        icon: <EnvelopeIcon {...icon} />,
+        name: "Notifier",
         path: "/notification",
         element: <Notification />,
         op: "",

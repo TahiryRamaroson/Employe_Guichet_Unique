@@ -30,7 +30,7 @@ import {CheckIcon, XMarkIcon, ArrowUpTrayIcon, DocumentIcon, ArrowDownTrayIcon, 
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon, TrashIcon} from "@heroicons/react/24/outline";
   
   export function ValidationPlainte() {
 
@@ -730,6 +730,43 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
 
     };
 
+    const Nettoyer = async () => {
+
+      setOpenPatienter(true);
+  
+      const apiNettoyer = `${api_url}/api/Plaintes/nettoyer`; 
+
+      try {
+        const reponseNettoyer = await fetch(apiNettoyer, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
+          },
+        });
+        if (!reponseNettoyer.ok) {
+          throw new Error('Erreur lors de la demande.');
+        }
+        const data = await reponseNettoyer.json();
+        setOpenPatienter(false);
+        if(data.error){
+          setErrorMessage(data.error);
+          setOpenError(true);
+          await new Promise(r => setTimeout(r, 2000));
+          setOpenError(false);
+          return;
+        }
+        setOpenSuccess(true);
+        await new Promise(r => setTimeout(r, 500));
+        setOpenSuccess(false);
+        setOpen(false);
+        console.log("dataNettoyer après la mise à jour d'état :", data);
+      } catch (error) {
+        console.error("Error: " + error.message);
+      }
+
+    };
+
     useEffect(() => {
       checkToken();
       getCategoriePlainte();
@@ -963,11 +1000,15 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
           </Button>
           <Button onClick={openDrawerModele} color="blue" variant="outlined" className="flex items-center border-2">
             <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
-            <span>Importer un modèle</span>
+            <span>Importer des données</span>
           </Button>
-          <Button onClick={downloadModel} color="blue" variant="outlined" className="flex items-center border-2">
+          <Button onClick={downloadModel} color="blue" variant="gradient" className="flex items-center">
             <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
-            <span>Exporter un modèle</span>
+            <span>Exporter des données</span>
+          </Button>
+          <Button onClick={Nettoyer} color="blue" variant="outlined" className="flex items-center border-2">
+            <TrashIcon className="h-5 w-5 mr-2" />
+            <span>Nettoyer les données</span>
           </Button>
         </div>
 
@@ -1584,9 +1625,9 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
                             }
                             size="sm"
                             value={
-                              item.statutTraitement == 10 ? 'Traité' :
+                              item.statutTraitement == 10 ? 'Traitée' :
                               item.statutTraitement == 5 ? 'En cours' :
-                              item.statutTraitement == 0 ? 'Non traité' :
+                              item.statutTraitement == 0 ? 'Non traitée' :
                               'gray'
                             }
                           />
@@ -1623,7 +1664,7 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, ExclamationCircleIcon} from
         <Dialog open={open} handler={handleOpen} className="bg-green" size="lg">
             <DialogBody>
               <Card className="h-full w-full">
-                    <Button hidden={statutTraitement == 10 ? true : false} onClick={() => CloturerById(idPlainte)} variant="gradient" color="amber" className="m-auto mt-6 mb-6" type="submit" fullWidth={false} size="lg">
+                    <Button hidden={statutTraitement == 10 ? true : false} onClick={() => CloturerById(idPlainte)} variant="gradient" color="blue" className="m-auto mt-6 mb-6" type="submit" fullWidth={false} size="lg">
                       Cloturer
                     </Button>
                 <form onSubmit={handleSubmitHistorique} className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-6 ml-6 mr-6">

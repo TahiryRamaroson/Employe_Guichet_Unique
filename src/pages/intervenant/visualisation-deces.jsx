@@ -9,17 +9,12 @@ import {
     Select, 
     Option,
     Chip,
-    SpeedDial,
-    SpeedDialAction,
-    SpeedDialContent,
-    SpeedDialHandler,
-    IconButton,
     Tooltip
   } from "@material-tailwind/react";
 
 import DateFormatter from "@/widgets/layout/date-formatter";
 
-import {ArrowUpTrayIcon, DocumentIcon, PhotoIcon} from "@heroicons/react/24/solid";
+import {PhotoIcon} from "@heroicons/react/24/solid";
 
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
@@ -61,58 +56,6 @@ import { jwtDecode } from "jwt-decode";
         navigate('/auth/sign-in');
       }
 
-    };
-
-    const downloadCSV = async () => {
-      try {
-        const response = await fetch(`${api_url}/api/Deces/export/csv`, {
-          method: 'GET',
-          headers: {
-            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
-          },
-        });
-    
-        if (!response.ok) {
-          throw new Error('Erreur lors du téléchargement du fichier');
-        }
-    
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `deces_${new Date().toISOString()}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } catch (error) {
-        console.error('Erreur:', error);
-      }
-    };
-
-    const downloadExcel = async () => {
-      try {
-        const response = await fetch(`${api_url}/api/Deces/export/excel`, {
-          method: 'GET',
-          headers: {
-            'Authorization': 'Bearer ' + sessionStorage.getItem('authToken'),
-          },
-        });
-    
-        if (!response.ok) {
-          throw new Error('Erreur lors du téléchargement du fichier');
-        }
-    
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `deces_${new Date().toISOString()}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } catch (error) {
-        console.error('Erreur:', error);
-      }
     };
 
     const getDeces = async (pageNumber) => {
@@ -270,32 +213,6 @@ import { jwtDecode } from "jwt-decode";
           >
             Visualisation des décès
           </Typography>
-
-          <Card color="transparent" shadow={false} className="p-6 text-center mb-8">
-            <SpeedDial placement="bottom">
-              <Tooltip placement="top" color="light" content="Exporter" delay={500}>
-                <SpeedDialHandler>
-                  <IconButton size="lg" className="rounded-full" color="gray">
-                    <ArrowUpTrayIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                  </IconButton>
-                </SpeedDialHandler>
-              </Tooltip>
-              <SpeedDialContent className="flex-row">
-                <SpeedDialAction onClick={downloadExcel} className="h-16 w-16 hover:animate-pulse">
-                  <DocumentIcon className="h-5 w-5" />
-                  <Typography color="blue-gray" className="text-xs font-normal">
-                    Excel
-                  </Typography>
-                </SpeedDialAction>
-                <SpeedDialAction onClick={downloadCSV} className="h-16 w-16 hover:animate-pulse">
-                  <DocumentIcon className="h-5 w-5" />
-                  <Typography color="blue-gray" className="text-xs font-normal">
-                    CSV
-                  </Typography>
-                </SpeedDialAction>
-              </SpeedDialContent>
-            </SpeedDial>
-          </Card>
 
         <Card color="transparent" shadow={false} className="p-6">
           <form onSubmit={submitFiltre} className="grid grid-cols-1 md:grid-cols-5 gap-6">

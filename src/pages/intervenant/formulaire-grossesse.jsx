@@ -140,6 +140,7 @@ export function FormGrossesse() {
       setOpenError(true);
       await new Promise(r => setTimeout(r, 2000));
       setOpenError(false);
+      return;
     }
 
     const foData = new FormData();
@@ -147,12 +148,18 @@ export function FormGrossesse() {
     foData.append('PieceJustificative', formData.PieceJustificative);
     foData.append('DerniereRegle', formData.DerniereRegle);
     foData.append('DateAccouchement', formData.DateAccouchement);
-    if(selectedAntecedents.length != 0) foData.append('AntecedentMedicaux', selectedAntecedents);
+    if (selectedAntecedents.length > 0) {
+      selectedAntecedents.forEach((antecedent, index) => {
+        foData.append(`AntecedentMedicaux[${index}]`, parseInt(antecedent, 10)); // Ajoutez chaque valeur individuellement
+      });
+    }
     foData.append('RisqueComplication', complication);
     foData.append('Statut', formData.Statut);
     foData.append('StatutGrossesse', formData.StatutGrossesse);
     foData.append('IdMere', formData.IdMere);
     foData.append('IdIntervenant', formData.IdIntervenant);
+
+    console.log("formData-------------------------------------- :", formData);
 
     try {
       const response = await axios.post(`${api_url}/api/Grossesses`, foData, {
@@ -173,7 +180,7 @@ export function FormGrossesse() {
       await new Promise(r => setTimeout(r, 500));
       setOpenSuccess(false);
     } catch (error) {
-      console.error(error);
+      console.error('Axios error:', error.response ? error.response.data : error.message);
 
     }
   };

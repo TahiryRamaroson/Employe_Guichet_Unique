@@ -602,7 +602,7 @@ export function FormMigrationSortante() {
                             color="blue-gray"
                             className="font-normal text-blue-gray-400"
                           >
-                            national
+                            nationale
                           </Typography>
                         }
                       />
@@ -618,7 +618,7 @@ export function FormMigrationSortante() {
                             color="blue-gray"
                             className="font-normal text-blue-gray-400"
                           >
-                            international
+                            internationale
                           </Typography>
                         }
                       />
